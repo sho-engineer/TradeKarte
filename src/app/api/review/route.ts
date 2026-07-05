@@ -5,6 +5,7 @@ import {
   ReviewError,
   type ImageMediaType,
 } from "@/lib/review/claude";
+import { isMockMode, mockReview } from "@/lib/review/mock";
 import type { ReviewRequestBody, ReviewResponseBody } from "@/lib/review/types";
 import { detectPatterns, patternWindowStart } from "@/lib/pattern";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
@@ -113,14 +114,16 @@ export async function POST(request: NextRequest) {
 
   let review;
   try {
-    review = await generateReview({
-      imageMediaType: image.mediaType,
-      imageBase64: image.base64,
-      memo,
-      pair: sanitizeShort(body.pair),
-      direction: sanitizeShort(body.direction),
-      result: sanitizeShort(body.result),
-    });
+    review = isMockMode()
+      ? mockReview()
+      : await generateReview({
+          imageMediaType: image.mediaType,
+          imageBase64: image.base64,
+          memo,
+          pair: sanitizeShort(body.pair),
+          direction: sanitizeShort(body.direction),
+          result: sanitizeShort(body.result),
+        });
   } catch (err) {
     if (err instanceof ReviewError) {
       return NextResponse.json({ error: err.message }, { status: err.status });

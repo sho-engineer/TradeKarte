@@ -28,6 +28,7 @@ cp .env.example .env.local
 ```
 
 - `ANTHROPIC_API_KEY` … [Anthropic Console](https://console.anthropic.com/) で発行。**これだけ設定すれば、保存なしのお試しモードで動作確認できます。**
+- `MOCK_REVIEW=1` … APIキー無しで固定レビューを返す開発/デモ用モード。UIフローの確認やコスト節約に。
 - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` … Supabase プロジェクトの Settings → API から。
 
 ### 3. Supabase(認証・保存を使う場合)
