@@ -16,26 +16,26 @@ export default async function AppLayout({
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <header className="border-b border-line bg-panel">
-        <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-3">
-          <nav className="flex items-center gap-5">
+        <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-6 py-3">
+          <nav className="flex items-center gap-4 sm:gap-5">
             <Link href="/" className="font-mono font-bold text-accent">
               TradeKarte
             </Link>
             <Link
               href="/app"
-              className="text-sm text-muted hover:text-ink"
+              className="whitespace-nowrap text-sm text-muted hover:text-ink"
             >
               新規カルテ
             </Link>
             <Link
               href="/app/history"
-              className="text-sm text-muted hover:text-ink"
+              className="whitespace-nowrap text-sm text-muted hover:text-ink"
             >
               履歴
             </Link>
             <Link
               href="/upgrade"
-              className="text-sm text-muted hover:text-ink"
+              className="whitespace-nowrap text-sm text-muted hover:text-ink"
             >
               プラン
             </Link>
@@ -57,7 +57,8 @@ export default async function AppLayout({
               </>
             ) : (
               <span className="font-mono text-xs text-mixed">
-                お試しモード（保存されません）
+                お試しモード
+                <span className="hidden sm:inline">（保存されません）</span>
               </span>
             )}
           </div>

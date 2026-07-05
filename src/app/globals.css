@@ -1,12 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0b0f14;
+  --bg: #0a0e13;
+  --bg-2: #0d1219;
   --panel: #121820;
   --panel-2: #171f29;
+  --panel-3: #1c2530;
   --ink: #e6edf3;
   --muted: #8b98a5;
   --line: #232e3a;
+  --line-strong: #31414f;
   --accent: #4cc2a8;
   --accent-dim: #2c7a6a;
   --edge: #3fb97f;
@@ -16,11 +19,14 @@
 
 @theme inline {
   --color-bg: var(--bg);
+  --color-bg-2: var(--bg-2);
   --color-panel: var(--panel);
   --color-panel-2: var(--panel-2);
+  --color-panel-3: var(--panel-3);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
   --color-accent: var(--accent);
   --color-accent-dim: var(--accent-dim);
   --color-edge: var(--edge);
@@ -35,12 +41,106 @@ html {
 }
 
 body {
-  background: var(--bg);
   color: var(--ink);
   font-family: var(--font-noto-sans-jp), sans-serif;
   -webkit-font-smoothing: antialiased;
+  /* 計器/チャートの質感: 淡いラジアルグロー + 微細グリッド */
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(
+      70rem 40rem at 50% -10%,
+      rgba(76, 194, 168, 0.06),
+      transparent 60%
+    ),
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+  background-attachment: fixed;
+  background-position: 0 0;
 }
 
 ::selection {
   background: var(--accent-dim);
+  color: var(--ink);
+}
+
+/* カスタムスクロールバー */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+  background-clip: padding-box;
+}
+
+/* フォーカスリング(キーボード操作時のみ) */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* shimmer プレースホルダ(ローディング) */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--panel-2);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.06),
+    transparent
+  );
+  animation: shimmer 1.4s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .skeleton::after {
+    display: none;
+  }
 }
