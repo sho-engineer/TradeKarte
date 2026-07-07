@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { formatJst } from "@/lib/db";
 import {
   fileToResizedJpegDataUrl,
   MAIN_IMAGE_MAX_EDGE,
@@ -12,24 +13,28 @@ import {
   type Review,
   type ReviewResponseBody,
 } from "@/lib/review/types";
-import { VERDICT_META } from "@/lib/review/verdict";
 import KarteCard from "./KarteCard";
 
-const PAIRS = ["", "USD/JPY", "EUR/USD", "GBP/JPY", "EUR/JPY", "AUD/JPY", "GBP/USD", "XAU/USD", "その他"];
-const DIRECTIONS = ["", "ロング", "ショート"];
-const RESULTS = ["", "勝ち", "負け", "建値", "未確定"];
+const PAIRS = ["USD/JPY", "EUR/USD", "GBP/JPY", "EUR/JPY", "AUD/JPY", "GBP/USD", "XAU/USD", "その他"];
+const DIRECTIONS = ["ロング", "ショート"];
+const RESULTS = ["勝ち", "負け", "建値", "未確定"];
 const MEMO_MAX = 2000;
 
 interface Result {
   review: Review;
   warnings: string[];
   karteId: string | null;
+  createdAt: string;
 }
 
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
   return `${(n / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function fileKind(file: File): string {
+  return (file.type.split("/")[1] ?? "img").toUpperCase();
 }
 
 export default function ReviewForm() {
@@ -46,6 +51,14 @@ export default function ReviewForm() {
   const [karte, setKarte] = useState<Result | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
+
+  // 受付番号は表示用(日時ベース)。SSRとクライアントで秒差が出うるので
+  // 表示側で suppressHydrationWarning を付ける
+  const intakeNo = useMemo(() => {
+    const d = new Date();
+    const p = (n: number) => String(n).padStart(2, "0");
+    return `TK-${d.getFullYear()}-${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`;
+  }, []);
 
   const acceptFile = useCallback((f: File | undefined | null) => {
     if (!f) return;
@@ -70,7 +83,6 @@ export default function ReviewForm() {
     if (inputRef.current) inputRef.current.value = "";
   }, []);
 
-  // 結果生成/ローディング開始時に結果ブロックへスクロール
   useEffect(() => {
     if ((karte || loading) && resultRef.current) {
       resultRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -105,13 +117,15 @@ export default function ReviewForm() {
         error?: string;
       };
       if (!res.ok) {
-        setError(data.error ?? "レビューに失敗しました。");
+        setError(data.error ?? "診断に失敗しました。");
         return;
       }
       setKarte({
         review: data.review,
         warnings: data.warnings,
         karteId: data.karteId,
+        createdAt:
+          formatJst(new Date().toISOString()).replaceAll("/", ".") + " JST",
       });
     } catch {
       setError("通信に失敗しました。時間をおいて再試行してください。");
@@ -120,143 +134,146 @@ export default function ReviewForm() {
     }
   }
 
+  const dropHandlers = {
+    onDragOver: (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragging(true);
+    },
+    onDragLeave: () => setDragging(false),
+    onDrop: (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragging(false);
+      acceptFile(e.dataTransfer.files?.[0]);
+    },
+  };
+
   return (
-    <div className="space-y-8">
-      <form onSubmit={submit} className="space-y-5">
-        {/* ドロップゾーン */}
-        <div>
-          <div
-            role="button"
-            tabIndex={0}
-            aria-label="チャート画像を選択"
-            onClick={() => inputRef.current?.click()}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                inputRef.current?.click();
+    <div className="space-y-10">
+      <form onSubmit={submit} className="tk-card">
+        {/* masthead */}
+        <div className="tk-input__masthead">
+          <div>
+            <div className="tk-input__title">新規カルテ受付</div>
+            <div className="tk-input__subtitle">NEW RECORD · INTAKE</div>
+          </div>
+          <span className="tk-input__no" suppressHydrationWarning>
+            No. {intakeNo}
+          </span>
+        </div>
+
+        {/* specimen dropzone */}
+        <div className="tk-input__block">
+          <div className="tk-input__label tk-input__label--accent">
+            検体添付欄 / CHART
+          </div>
+          {file && previewUrl ? (
+            <div
+              className={
+                "tk-input__dropzone" +
+                (dragging ? " tk-input__dropzone--drag" : "")
               }
-            }}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragging(true);
-            }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDragging(false);
-              acceptFile(e.dataTransfer.files?.[0]);
-            }}
-            className={`group relative flex min-h-44 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 text-center transition-colors ${
-              dragging
-                ? "border-accent bg-accent/10"
-                : "border-line bg-panel hover:border-line-strong"
-            }`}
-          >
-            {previewUrl ? (
-              <>
+              {...dropHandlers}
+            >
+              <div className="tk-input__dropzone-row">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={previewUrl}
                   alt="選択したチャート"
-                  className="max-h-72 rounded-lg"
+                  className="tk-input__thumb"
                 />
-                <button
-                  type="button"
-                  aria-label="画像をクリア"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    clearFile();
-                  }}
-                  className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-line-strong bg-bg/80 text-muted backdrop-blur transition-colors hover:border-impulse hover:text-impulse"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-4 w-4"
-                    fill="none"
-                    aria-hidden
+                <div className="tk-input__file-info">
+                  <div className="tk-input__filename">{file.name}</div>
+                  <div className="tk-input__filemeta">
+                    {fileKind(file)} · {formatBytes(file.size)}
+                  </div>
+                </div>
+                <div className="tk-input__dropzone-actions">
+                  <button
+                    type="button"
+                    className="tk-btn tk-btn--ghost"
+                    onClick={() => inputRef.current?.click()}
                   >
-                    <path
-                      d="M6 6l12 12M18 6L6 18"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </button>
-              </>
-            ) : (
-              <>
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="mb-2 h-9 w-9 text-muted transition-colors group-hover:text-accent"
-                  aria-hidden
-                >
-                  <path
-                    d="M4 16l4.6-4.6a2 2 0 012.8 0L16 16m-2-2l1.6-1.6a2 2 0 012.8 0L21 14M4 20h16a2 2 0 002-2V6a2 2 0 00-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2zM10 9a1 1 0 11-2 0 1 1 0 012 0z"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <p className="text-sm font-medium text-ink">
-                  チャート画像をドラッグ&ドロップ
-                </p>
-                <p className="mt-1 text-xs text-muted">
-                  またはタップして選択（JPEG / PNG / WebP）
-                </p>
-              </>
-            )}
-            <input
-              ref={inputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden"
-              onChange={(e) => acceptFile(e.target.files?.[0])}
-            />
-          </div>
-          {file && (
-            <div className="mt-2 flex items-center justify-between gap-2 rounded-lg border border-line bg-panel px-3 py-2">
-              <span className="truncate font-mono text-xs text-ink/80">
-                {file.name}
-                <span className="ml-2 text-muted">{formatBytes(file.size)}</span>
-              </span>
-              <button
-                type="button"
-                onClick={clearFile}
-                className="shrink-0 font-mono text-xs text-muted hover:text-impulse"
-              >
-                クリア
-              </button>
+                    差し替え
+                  </button>
+                  <button
+                    type="button"
+                    className="tk-btn tk-btn--danger-ghost"
+                    onClick={clearFile}
+                  >
+                    クリア
+                  </button>
+                </div>
+              </div>
+              <div className="tk-input__dropzone-note">
+                画像は診断と履歴サムネイルの生成にのみ使用します。
+              </div>
+            </div>
+          ) : (
+            <div
+              role="button"
+              tabIndex={0}
+              aria-label="チャート画像を選択"
+              className={
+                "tk-input__dropzone tk-input__dropzone--empty" +
+                (dragging ? " tk-input__dropzone--drag" : "")
+              }
+              onClick={() => inputRef.current?.click()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  inputRef.current?.click();
+                }
+              }}
+              {...dropHandlers}
+            >
+              <div className="tk-input__dropzone-cta">
+                チャート画像をここへ — ドラッグ&ドロップ / タップで選択
+              </div>
+              <div className="tk-input__dropzone-sub">
+                JPEG · PNG · WEBP
+              </div>
             </div>
           )}
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={(e) => acceptFile(e.target.files?.[0])}
+          />
         </div>
 
-        {/* メモ */}
-        <div>
+        {/* memo */}
+        <div className="tk-input__block">
+          <div className="tk-input__memo-head">
+            <span className="tk-input__label">状況メモ / NOTE</span>
+            <span className="tk-input__counter">
+              {memo.length} / {MEMO_MAX}
+            </span>
+          </div>
           <textarea
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
             rows={3}
             maxLength={MEMO_MAX}
-            placeholder="状況メモ（例: 東京時間のレンジ上抜けを見てロング。直前に2連敗していて取り返したい気持ちがあった…）"
-            className="w-full rounded-xl border border-line bg-panel px-4 py-3 text-sm placeholder:text-muted/60 focus:border-accent focus:outline-none"
+            placeholder="例: ずっと見てた高値をやっと抜けた。乗り遅れたくなくて成行で入った。"
+            className="tk-textarea"
           />
-          <div className="mt-1 text-right font-mono text-[11px] text-muted">
-            {memo.length} / {MEMO_MAX}
-          </div>
         </div>
 
-        {/* F1: エントリー前の自己申告感情(任意・1タップ) */}
-        <div>
-          <span className="mb-1.5 block font-mono text-[11px] uppercase tracking-wider text-muted">
-            エントリー前の感情
-            <span className="ml-1.5 normal-case tracking-normal text-muted/70">
-              任意・もう一度タップで解除
+        {/* F1: エントリー前の自己申告感情 */}
+        <div className="tk-input__block">
+          <div className="tk-input__label">
+            エントリー前の感情 / STATE{" "}
+            <span className="tk-input__label-note">
+              — 任意・もう一度タップで解除
             </span>
-          </span>
-          <div className="flex flex-wrap gap-2" role="group" aria-label="エントリー前の感情">
+          </div>
+          <div
+            className="tk-input__pillrow"
+            role="group"
+            aria-label="エントリー前の感情"
+          >
             {EMOTIONS.map(({ value, emoji }) => {
               const selected = emotion === value;
               return (
@@ -265,143 +282,129 @@ export default function ReviewForm() {
                   type="button"
                   aria-pressed={selected}
                   onClick={() => setEmotion(selected ? "" : value)}
-                  className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
-                    selected
-                      ? "border-accent bg-accent/10 text-ink"
-                      : "border-line bg-panel text-muted hover:border-line-strong hover:text-ink"
-                  }`}
+                  className={"tk-pill" + (selected ? " tk-pill--active" : "")}
                 >
-                  <span aria-hidden className="mr-1">
-                    {emoji}
-                  </span>
-                  {value}
+                  <span aria-hidden>{emoji}</span> {value}
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* メタ */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <label className="block">
-            <span className="mb-1 block font-mono text-[11px] uppercase tracking-wider text-muted">
-              通貨ペア
-            </span>
-            <select
-              value={pair}
-              onChange={(e) => setPair(e.target.value)}
-              className="w-full rounded-lg border border-line bg-panel px-3 py-2 text-sm focus:border-accent focus:outline-none"
-            >
-              {PAIRS.map((p) => (
-                <option key={p} value={p}>
-                  {p === "" ? "選択しない" : p}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block">
-            <span className="mb-1 block font-mono text-[11px] uppercase tracking-wider text-muted">
-              方向
-            </span>
-            <select
-              value={direction}
-              onChange={(e) => setDirection(e.target.value)}
-              className="w-full rounded-lg border border-line bg-panel px-3 py-2 text-sm focus:border-accent focus:outline-none"
-            >
-              {DIRECTIONS.map((d) => (
-                <option key={d} value={d}>
-                  {d === "" ? "選択しない" : d}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block">
-            <span className="mb-1 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-muted">
-              結果
-              <span className="rounded bg-panel-2 px-1 py-0.5 text-[9px] normal-case tracking-normal text-muted/80">
-                判定に影響しない
-              </span>
-            </span>
-            <select
-              value={result}
-              onChange={(e) => setResult(e.target.value)}
-              className="w-full rounded-lg border border-line bg-panel px-3 py-2 text-sm focus:border-accent focus:outline-none"
-            >
-              {RESULTS.map((r) => (
-                <option key={r} value={r}>
-                  {r === "" ? "選択しない" : r}
-                </option>
-              ))}
-            </select>
-          </label>
+        {/* optional fields */}
+        <div className="tk-input__block">
+          <div className="tk-input__label">
+            任意項目{" "}
+            <span className="tk-input__label-note">— 判定には影響しません</span>
+          </div>
+          <div className="tk-input__optgrid">
+            <div className="tk-input__optcell">
+              <div className="tk-input__optlabel">通貨ペア</div>
+              <div className="tk-select-wrap">
+                <select
+                  value={pair}
+                  onChange={(e) => setPair(e.target.value)}
+                  className="tk-select"
+                  aria-label="通貨ペア"
+                >
+                  <option value="">—</option>
+                  {PAIRS.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="tk-input__optcell">
+              <div className="tk-input__optlabel">方向</div>
+              <div className="tk-input__pillrow" role="group" aria-label="方向">
+                {DIRECTIONS.map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    aria-pressed={direction === d}
+                    onClick={() => setDirection(direction === d ? "" : d)}
+                    className={
+                      "tk-pill" + (direction === d ? " tk-pill--active" : "")
+                    }
+                  >
+                    {d}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="tk-input__optcell">
+              <div className="tk-input__optlabel">結果</div>
+              <div className="tk-input__pillrow" role="group" aria-label="結果">
+                {RESULTS.map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    aria-pressed={result === r}
+                    onClick={() => setResult(result === r ? "" : r)}
+                    className={
+                      "tk-pill" + (result === r ? " tk-pill--active" : "")
+                    }
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
         {error && (
-          <p
-            aria-live="assertive"
-            className="rounded-lg border border-impulse/40 bg-impulse/10 px-4 py-3 text-sm text-impulse"
-          >
+          <p aria-live="assertive" className="tk-input__error">
             {error}
           </p>
         )}
 
-        <button
-          type="submit"
-          disabled={!file || loading}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 font-semibold text-bg transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {loading ? (
-            <>
-              <svg
-                viewBox="0 0 24 24"
-                className="h-4 w-4 animate-spin"
-                fill="none"
-                aria-hidden
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="9"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  className="opacity-25"
-                />
-                <path
-                  d="M21 12a9 9 0 00-9-9"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
-              </svg>
-              AIがカルテを作成中…
-            </>
-          ) : (
-            "レビューを依頼する"
-          )}
-        </button>
+        {/* submit */}
+        <div className="tk-input__submit">
+          <button
+            type="submit"
+            disabled={!file || loading}
+            className="tk-btn tk-btn--primary"
+          >
+            {loading ? "診断中…" : "診断を依頼する"}
+          </button>
+          <span className="tk-input__submit-note">
+            過去の売買の振り返り専用。
+            <br />
+            将来の売買シグナル・価格予測は提供しません。
+          </span>
+        </div>
       </form>
 
       <div ref={resultRef}>
-        {loading && <KarteSkeleton />}
+        {loading && <KarteTypesetting />}
 
         {!loading && karte && (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[11px] uppercase tracking-widest text-muted">
-                Karte
-              </span>
-              <span className="h-px flex-1 bg-line" />
-            </div>
-            <KarteCard review={karte.review} warnings={karte.warnings} />
+          <div className="space-y-4">
+            <KarteCard
+              review={karte.review}
+              warnings={karte.warnings}
+              meta={{
+                createdAt: karte.createdAt,
+                pair: pair || null,
+                direction: direction || null,
+                result: result || null,
+                emotionPre: emotion || null,
+                memo: memo || null,
+                thumbUrl: previewUrl,
+              }}
+            />
             {karte.karteId ? (
               <Link
                 href={`/app/karte/${karte.karteId}`}
-                className="inline-flex items-center gap-1 text-sm text-accent hover:underline"
+                className="tk-btn tk-btn--ghost inline-block no-underline"
               >
-                履歴で詳しく見る →
+                台帳でこのカルテを見る →
               </Link>
             ) : (
-              <p className="text-xs text-muted">
+              <p className="tk-input__submit-note">
                 ※ ログインしていないため、このカルテは保存されていません。
               </p>
             )}
@@ -412,33 +415,61 @@ export default function ReviewForm() {
   );
 }
 
-function KarteSkeleton() {
-  const rails = Object.values(VERDICT_META).map((m) => m.border);
+/** 診断待ちの「組版中」スケルトン(通常10〜20秒) */
+function KarteTypesetting() {
+  const rows = [
+    { n: "01", delay: "0.1s" },
+    { n: "02", delay: "0.35s" },
+    { n: "03", delay: "0.6s" },
+  ];
   return (
-    <div
-      aria-live="polite"
-      aria-busy="true"
-      className="overflow-hidden rounded-xl border border-line-strong bg-panel"
-    >
-      <div className="flex items-center gap-3 border-b border-line px-5 py-4">
-        <div className="skeleton h-14 w-14 rounded-lg" />
-        <div className="space-y-2">
-          <div className="skeleton h-3.5 w-24 rounded" />
-          <div className="skeleton h-2.5 w-40 rounded" />
+    <div className="tk-loading tk-card" aria-live="polite" aria-busy="true">
+      <div className="tk-loading__head">
+        <span className="tk-loading__title">診断カルテ</span>
+        <span className="tk-loading__status">● 組版中</span>
+      </div>
+      <div className="tk-loading__body">
+        <div className="tk-skel tk-loading__chart-skel" />
+        <div className="tk-loading__verdict-skel">
+          <div className="tk-skel tk-loading__stamp-skel" />
+          <div className="tk-loading__verdict-lines">
+            <div
+              className="tk-skel"
+              style={{ height: 14, width: "60%", marginBottom: 12 }}
+            />
+            <div
+              className="tk-skel"
+              style={{ height: 20, width: "100%", marginBottom: 8 }}
+            />
+            <div className="tk-skel" style={{ height: 20, width: "80%" }} />
+          </div>
+        </div>
+        <div className="tk-loading__sections">
+          {rows.map((row) => (
+            <div className="tk-loading__section-row" key={row.n}>
+              <div className="tk-loading__section-head">
+                <span className="tk-loading__section-n">{row.n}</span>
+                <span
+                  className="tk-loading__ink-rule"
+                  style={{ animationDelay: row.delay }}
+                />
+              </div>
+              <div
+                className="tk-skel"
+                style={{ height: 12, width: "92%", marginBottom: 6 }}
+              />
+              <div className="tk-skel" style={{ height: 12, width: "70%" }} />
+            </div>
+          ))}
         </div>
       </div>
-      <div className="space-y-3 px-5 py-5">
-        <div className="skeleton h-16 w-full rounded-lg" />
-        {rails.map((border, i) => (
-          <div
-            key={i}
-            className={`rounded-lg border-l-2 ${border} bg-panel-2/40 py-3 pl-4 pr-3`}
-          >
-            <div className="skeleton mb-2 h-3 w-28 rounded" />
-            <div className="skeleton h-2.5 w-full rounded" />
-            <div className="skeleton mt-1.5 h-2.5 w-4/5 rounded" />
-          </div>
-        ))}
+      <div className="tk-loading__footer">
+        <div className="tk-loading__footer-line">
+          意思決定の質を診ています…
+        </div>
+        <div className="tk-loading__footer-sub">
+          通常 10〜20 秒 · 損益ではなく判断を評価
+        </div>
       </div>
     </div>
   );

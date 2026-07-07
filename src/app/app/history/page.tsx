@@ -1,144 +1,170 @@
 import Link from "next/link";
-import { VerdictChip } from "@/components/KarteCard";
-import { formatJst, THUMB_BUCKET, type KarteRow } from "@/lib/db";
+import VerdictStamp from "@/components/VerdictStamp";
+import { formatRecordNo, type KarteRow } from "@/lib/db";
+import { VERDICTS } from "@/lib/review/types";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
 type ListRow = Pick<
   KarteRow,
-  | "id"
-  | "created_at"
-  | "pair"
-  | "direction"
-  | "result"
-  | "verdict"
-  | "tags"
-  | "image_thumb_url"
-  | "memo"
+  "id" | "created_at" | "verdict" | "coach" | "tags" | "seq"
 >;
 
-export default async function HistoryPage() {
+function formatLedgerDate(iso: string): string {
+  const d = new Date(iso);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+export default async function HistoryPage({
+  searchParams,
+}: PageProps<"/app/history">) {
+  const { verdict } = await searchParams;
+  const filter =
+    typeof verdict === "string" &&
+    (VERDICTS as readonly string[]).includes(verdict)
+      ? verdict
+      : null;
+
   if (!isSupabaseConfigured()) {
     return (
-      <p className="text-sm text-muted">
-        履歴機能を使うには Supabase の設定とログインが必要です。
-      </p>
+      <div className="tk-page">
+        <div className="tk-page__col tk-page__col--wide tk-card">
+          <p className="tk-history__empty">
+            台帳を使うには Supabase の設定とログインが必要です。
+          </p>
+        </div>
+      </div>
     );
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("karte")
-    .select(
-      "id, created_at, pair, direction, result, verdict, tags, image_thumb_url, memo",
-    )
+    .select("id, created_at, verdict, coach, tags, seq", { count: "exact" })
     .order("created_at", { ascending: false })
     .limit(100);
+  if (filter) query = query.eq("verdict", filter);
+  const { data, count, error } = await query;
 
   if (error) {
     return (
-      <p className="text-sm text-impulse">履歴の取得に失敗しました。</p>
+      <div className="tk-page">
+        <div className="tk-page__col tk-page__col--wide tk-card">
+          <p className="tk-history__empty">台帳の取得に失敗しました。</p>
+        </div>
+      </div>
     );
   }
   const rows = (data ?? []) as ListRow[];
 
-  const thumbPaths = rows
-    .map((r) => r.image_thumb_url)
-    .filter((p): p is string => Boolean(p));
-  const signedUrlByPath = new Map<string, string>();
-  if (thumbPaths.length > 0) {
-    const { data: signed } = await supabase.storage
-      .from(THUMB_BUCKET)
-      .createSignedUrls(thumbPaths, 3600);
-    for (const s of signed ?? []) {
-      if (s.signedUrl && s.path) signedUrlByPath.set(s.path, s.signedUrl);
-    }
-  }
+  const filters = [
+    { label: "全て", href: "/app/history", active: !filter },
+    ...VERDICTS.map((v) => ({
+      label: v,
+      href: `/app/history?verdict=${encodeURIComponent(v)}`,
+      active: filter === v,
+    })),
+  ];
+
+  const filterChips = (
+    <div className="tk-history__filters">
+      {filters.map((f) => (
+        <Link
+          key={f.label}
+          href={f.href}
+          className={
+            "tk-history__filter" + (f.active ? " tk-history__filter--active" : "")
+          }
+        >
+          {f.label}
+        </Link>
+      ))}
+    </div>
+  );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold">カルテ履歴</h1>
-        <p className="mt-1 text-sm text-muted">直近100件を表示しています。</p>
-      </div>
+    <div className="tk-page">
+      <div className="tk-page__col tk-page__col--wide">
+        <div className="tk-card">
+          <div className="tk-history__head">
+            <div>
+              <div className="tk-history__title">カルテ台帳</div>
+              <div className="tk-history__subtitle">
+                <span className="tk-only-desktop-inline">
+                  RECORD LEDGER ·{" "}
+                </span>
+                全 {count ?? rows.length} 件
+              </div>
+            </div>
+            <div className="tk-only-desktop">{filterChips}</div>
+          </div>
 
-      {rows.length === 0 ? (
-        <div className="rounded-xl border border-line bg-panel p-8 text-center">
-          <p className="text-sm text-muted">
-            まだカルテがありません。
-            <Link href="/app" className="text-accent hover:underline">
-              最初のカルテを作成
-            </Link>
-            しましょう。
-          </p>
-        </div>
-      ) : (
-        <ul className="space-y-3">
-          {rows.map((row) => {
-            const thumbUrl = row.image_thumb_url
-              ? signedUrlByPath.get(row.image_thumb_url)
-              : undefined;
-            return (
-              <li key={row.id}>
-                <Link
-                  href={`/app/karte/${row.id}`}
-                  className="flex gap-4 rounded-xl border border-line bg-panel p-4 transition-colors hover:border-accent"
-                >
-                  {thumbUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={thumbUrl}
-                      alt=""
-                      className="h-16 w-24 shrink-0 rounded-md border border-line object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-md border border-line bg-panel-2 font-mono text-[10px] text-muted">
-                      NO IMG
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1 space-y-1.5">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <VerdictChip verdict={row.verdict} />
-                      <span className="font-mono text-xs text-muted">
-                        {formatJst(row.created_at)}
-                      </span>
-                      {row.pair && (
-                        <span className="font-mono text-xs text-muted">
-                          {row.pair}
+          <div className="tk-history__filters-mobile tk-only-mobile">
+            {filterChips}
+          </div>
+
+          {rows.length === 0 ? (
+            <p className="tk-history__empty">
+              {filter
+                ? `「${filter}」のカルテはまだありません。`
+                : "まだカルテがありません。"}{" "}
+              <Link href="/app">最初の診断を依頼する →</Link>
+            </p>
+          ) : (
+            <>
+              <div className="tk-only-desktop">
+                <div className="tk-history__colhead">
+                  <span>判定</span>
+                  <span>No.</span>
+                  <span>日時</span>
+                  <span>所見（要約）</span>
+                  <span className="tk-history__colhead-tag">タグ</span>
+                </div>
+                {rows.map((r) => (
+                  <Link
+                    href={`/app/karte/${r.id}`}
+                    className="tk-history__row"
+                    key={r.id}
+                  >
+                    <VerdictStamp verdict={r.verdict} size="sm" withLabel={false} />
+                    <span className="tk-history__id">
+                      {formatRecordNo(r.created_at, r.seq)}
+                    </span>
+                    <span className="tk-history__date">
+                      {formatLedgerDate(r.created_at)}
+                    </span>
+                    <span className="tk-history__summary">{r.coach}</span>
+                    <span className="tk-history__tag">{r.tags[0] ?? ""}</span>
+                  </Link>
+                ))}
+              </div>
+
+              <div className="tk-only-mobile">
+                {rows.map((r) => (
+                  <Link
+                    href={`/app/karte/${r.id}`}
+                    className="tk-history__row-mobile"
+                    key={r.id}
+                  >
+                    <VerdictStamp verdict={r.verdict} size="sm" withLabel={false} />
+                    <div className="tk-history__row-mobile-body">
+                      <div className="tk-history__row-mobile-meta">
+                        <span className="tk-history__id">
+                          {formatRecordNo(r.created_at, r.seq)}
                         </span>
-                      )}
-                      {row.direction && (
-                        <span className="font-mono text-xs text-muted">
-                          {row.direction}
+                        <span className="tk-history__date">
+                          {formatLedgerDate(r.created_at).slice(0, 10)}
                         </span>
-                      )}
-                      {row.result && (
-                        <span className="font-mono text-xs text-muted">
-                          {row.result}
-                        </span>
-                      )}
-                    </div>
-                    {row.memo && (
-                      <p className="truncate text-sm text-ink/80">{row.memo}</p>
-                    )}
-                    {row.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {row.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="rounded bg-panel-2 px-1.5 py-0.5 font-mono text-[10px] text-muted"
-                          >
-                            #{tag}
-                          </span>
-                        ))}
                       </div>
-                    )}
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                      <div className="tk-history__summary-mobile">{r.coach}</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

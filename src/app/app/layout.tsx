@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AppNav from "@/components/AppNav";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
 export default async function AppLayout({
@@ -15,58 +16,29 @@ export default async function AppLayout({
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <header className="border-b border-line bg-panel">
-        <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-6 py-3">
-          <nav className="flex items-center gap-4 sm:gap-5">
-            <Link href="/" className="font-mono font-bold text-accent">
-              TradeKarte
-            </Link>
-            <Link
-              href="/app"
-              className="whitespace-nowrap text-sm text-muted hover:text-ink"
-            >
-              新規カルテ
-            </Link>
-            <Link
-              href="/app/history"
-              className="whitespace-nowrap text-sm text-muted hover:text-ink"
-            >
-              履歴
-            </Link>
-            <Link
-              href="/upgrade"
-              className="whitespace-nowrap text-sm text-muted hover:text-ink"
-            >
-              プラン
-            </Link>
-          </nav>
-          <div className="flex items-center gap-3">
+      <header className="tk-topbar">
+        <div className="tk-topbar__inner">
+          <Link href="/" className="tk-topbar__brand">
+            TRADEKARTE
+          </Link>
+          <AppNav />
+          <div className="tk-topbar__meta">
             {email ? (
               <>
-                <span className="hidden font-mono text-xs text-muted sm:inline">
-                  {email}
-                </span>
+                <span className="tk-only-desktop-inline">{email}</span>
                 <form action="/auth/signout" method="post">
-                  <button
-                    type="submit"
-                    className="rounded-lg border border-line px-3 py-1.5 text-xs text-muted hover:border-accent hover:text-ink"
-                  >
+                  <button type="submit" className="tk-topbar__signout">
                     ログアウト
                   </button>
                 </form>
               </>
             ) : (
-              <span className="font-mono text-xs text-mixed">
-                お試しモード
-                <span className="hidden sm:inline">（保存されません）</span>
-              </span>
+              <span>お試しモード · 保存なし</span>
             )}
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-8">
-        {children}
-      </main>
+      <main className="flex-1">{children}</main>
     </div>
   );
 }

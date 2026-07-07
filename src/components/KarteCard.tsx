@@ -1,18 +1,10 @@
 import type { Review } from "@/lib/review/types";
 import { verdictMeta } from "@/lib/review/verdict";
-
-export function VerdictChip({ verdict }: { verdict: string }) {
-  const m = verdictMeta(verdict);
-  return (
-    <span
-      className={`inline-flex items-center rounded-full border px-3 py-1 font-mono text-sm font-semibold ${m.chip}`}
-    >
-      {verdict}
-    </span>
-  );
-}
+import VerdictStamp from "./VerdictStamp";
 
 export interface KarteMeta {
+  /** 台帳行に出すカルテ番号(例: TK-20260731-014) */
+  recordNo?: string | null;
   createdAt?: string | null;
   pair?: string | null;
   direction?: string | null;
@@ -21,107 +13,6 @@ export interface KarteMeta {
   memo?: string | null;
   thumbUrl?: string | null;
 }
-
-/** F1: 自己申告感情とAI判定のズレを示す小バッジ */
-export function GapBadge() {
-  return (
-    <span className="inline-flex items-center gap-1 rounded border border-mixed/50 bg-mixed/10 px-1.5 py-0.5 font-mono text-[10px] font-medium text-mixed">
-      <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3" aria-hidden>
-        <path
-          d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinejoin="round"
-        />
-      </svg>
-      自己認識とズレ
-    </span>
-  );
-}
-
-function MetaCell({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-w-0">
-      <dt className="font-mono text-[10px] uppercase tracking-wider text-muted">
-        {label}
-      </dt>
-      <dd className="truncate text-sm text-ink">{value}</dd>
-    </div>
-  );
-}
-
-function Section({
-  label,
-  icon,
-  colorText,
-  colorBorder,
-  colorSoft,
-  children,
-}: {
-  label: string;
-  icon: React.ReactNode;
-  colorText: string;
-  colorBorder: string;
-  colorSoft: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className={`rounded-lg border-l-2 ${colorBorder} ${colorSoft} py-3 pl-4 pr-3`}>
-      <h3
-        className={`mb-1.5 flex items-center gap-1.5 font-mono text-xs font-semibold tracking-wider ${colorText}`}
-      >
-        {icon}
-        {label}
-      </h3>
-      <p className="text-sm leading-relaxed text-ink/90">{children}</p>
-    </section>
-  );
-}
-
-const IconCoach = (
-  <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" aria-hidden>
-    <path
-      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-const IconCritic = (
-  <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" aria-hidden>
-    <path
-      d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-const IconNext = (
-  <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" aria-hidden>
-    <path
-      d="M5 12h14m0 0l-6-6m6 6l-6 6"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-const IconAlert = (
-  <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 shrink-0" aria-hidden>
-    <path
-      d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 export default function KarteCard({
   review,
@@ -134,132 +25,205 @@ export default function KarteCard({
 }) {
   const m = verdictMeta(review.verdict);
   const metaCells = [
-    meta?.createdAt && { label: "日時", value: meta.createdAt },
     meta?.pair && { label: "通貨ペア", value: meta.pair },
     meta?.direction && { label: "方向", value: meta.direction },
-    meta?.result && { label: "結果", value: meta.result },
+    meta?.result && {
+      label: "結果",
+      value: meta.result,
+      dim: true,
+      note: "判定に非影響",
+    },
     meta?.emotionPre && { label: "自己申告", value: meta.emotionPre },
-  ].filter(Boolean) as { label: string; value: string }[];
+  ].filter(Boolean) as {
+    label: string;
+    value: string;
+    dim?: boolean;
+    note?: string;
+  }[];
 
   return (
-    <article className="animate-fade-in-up overflow-hidden rounded-xl border border-line-strong bg-panel shadow-[0_1px_0_0_rgba(255,255,255,0.03)_inset,0_12px_32px_-16px_rgba(0,0,0,0.6)]">
-      {warnings.length > 0 && (
-        <div className="flex items-start gap-2.5 border-b border-impulse/30 bg-impulse/10 px-5 py-3 text-impulse">
-          {IconAlert}
-          <div className="space-y-0.5">
-            <p className="font-mono text-[10px] font-semibold tracking-widest">
-              PATTERN ALERT
-            </p>
-            {warnings.map((w) => (
-              <p key={w} className="text-sm text-ink">
-                {w}
-              </p>
-            ))}
-          </div>
+    <div className="animate-fade-in-up">
+      {meta?.recordNo && (
+        <div className="tk-karte__ledger">
+          <span>RECORD</span>
+          <span>No. {meta.recordNo}</span>
         </div>
       )}
 
-      {/* 判定スタンプ帯 */}
-      <header
-        className={`flex items-center justify-between gap-3 border-b border-line px-5 py-4 ${m.soft}`}
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className={`flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-lg border ${m.chip}`}
-          >
-            <span className="font-mono text-base font-bold leading-none">
-              {review.verdict}
-            </span>
-          </div>
+      <article className="tk-karte__card">
+        {/* masthead */}
+        <div className="tk-karte__masthead">
           <div>
-            <p
-              className={`flex flex-wrap items-center gap-2 font-mono text-sm font-semibold ${m.text}`}
-            >
-              {m.gloss}
-              {review.emotion_gap && <GapBadge />}
-            </p>
-            <p className="mt-0.5 text-xs text-muted">{m.description}</p>
+            <div className="tk-karte__title">診断カルテ</div>
+            <div className="tk-karte__subtitle">DECISION QUALITY RECORD</div>
+          </div>
+          {meta?.createdAt && (
+            <div className="tk-karte__timestamp">{meta.createdAt}</div>
+          )}
+        </div>
+
+        {/* specimen */}
+        {(meta?.thumbUrl || meta?.memo) && (
+          <div className="tk-karte__specimen">
+            <div className="tk-karte__specimen-head">
+              <span className="tk-karte__specimen-label">
+                検体 <span className="tk-only-desktop-inline">/ SPECIMEN</span>
+              </span>
+              <span className="tk-karte__specimen-meta">
+                {[meta?.pair, "添付チャート"].filter(Boolean).join(" · ")}
+              </span>
+            </div>
+            {meta?.thumbUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={meta.thumbUrl}
+                alt="添付チャート"
+                className="tk-karte__chart"
+              />
+            )}
+            {meta?.memo && (
+              <div className="tk-karte__memo">
+                <div className="tk-karte__memo-label">状況メモ / NOTE</div>
+                <div className="tk-karte__memo-text">{meta.memo}</div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* verdict */}
+        <div className="tk-karte__verdict">
+          <VerdictStamp verdict={review.verdict} />
+          <div>
+            <div className="tk-karte__verdict-label">判定 / VERDICT</div>
+            <div className="tk-karte__verdict-headline">{m.headline}</div>
+            {review.emotion_gap && (
+              <span className="tk-karte__gap">⚡ 自己認識とズレ</span>
+            )}
+            <div className="tk-karte__verdict-note">
+              判定は損益と独立。エントリー時点で得られた情報のみで評価しています。
+            </div>
           </div>
         </div>
-        <p className="hidden max-w-[9rem] text-right text-[10px] leading-tight text-muted sm:block">
-          判定は損益と独立。エントリー時点の情報のみで評価。
-        </p>
-      </header>
 
-      <div className="space-y-5 px-5 py-5">
+        {/* meta ledger */}
         {metaCells.length > 0 && (
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-lg border border-line bg-bg-2/50 p-3 sm:grid-cols-4">
+          <div className="tk-karte__meta">
             {metaCells.map((c) => (
-              <MetaCell key={c.label} label={c.label} value={c.value} />
+              <div key={c.label} className="tk-karte__meta-cell">
+                <div className="tk-karte__meta-label">{c.label}</div>
+                <div
+                  className={
+                    "tk-karte__meta-value" +
+                    (c.dim ? " tk-karte__meta-value--dim" : "")
+                  }
+                >
+                  {c.value}
+                  {c.note && (
+                    <span className="tk-karte__meta-note tk-only-desktop-inline">
+                      {" "}
+                      {c.note}
+                    </span>
+                  )}
+                </div>
+              </div>
             ))}
-          </dl>
+          </div>
         )}
 
-        {meta?.thumbUrl && (
-          <figure className="overflow-hidden rounded-lg border border-line-strong">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={meta.thumbUrl}
-              alt="チャート"
-              className="w-full max-w-lg"
-            />
-          </figure>
-        )}
+        {/* numbered sections */}
+        <Section
+          first
+          n="01"
+          nColor="var(--tk-edge)"
+          title="所見"
+          tag="COACH"
+          body={review.coach}
+        />
+        <Section
+          n="02"
+          nColor="var(--tk-vermillion)"
+          title="指摘"
+          tag="CRITIC"
+          body={review.critic}
+        />
+        <Section
+          n="03"
+          nColor="var(--tk-mixed)"
+          title="次の一手"
+          tag="HABIT"
+          body={
+            <>
+              {review.next_action}{" "}
+              <span className="tk-karte__disclaimer">
+                ※これは過去の振り返りであり、売買の推奨ではありません。
+              </span>
+            </>
+          }
+        />
 
-        {meta?.memo && (
-          <section className="rounded-lg border border-line bg-bg-2/50 px-4 py-3">
-            <h3 className="mb-1 font-mono text-[10px] uppercase tracking-wider text-muted">
-              Memo
-            </h3>
-            <p className="whitespace-pre-wrap text-sm text-ink/80">
-              {meta.memo}
-            </p>
-          </section>
-        )}
-
-        <div className="space-y-3">
-          <Section
-            label="所見（コーチ）"
-            icon={IconCoach}
-            colorText="text-edge"
-            colorBorder="border-edge"
-            colorSoft="bg-edge/5"
-          >
-            {review.coach}
-          </Section>
-          <Section
-            label="指摘（批判者）"
-            icon={IconCritic}
-            colorText="text-impulse"
-            colorBorder="border-impulse"
-            colorSoft="bg-impulse/5"
-          >
-            {review.critic}
-          </Section>
-          <Section
-            label="次の一手"
-            icon={IconNext}
-            colorText="text-mixed"
-            colorBorder="border-mixed"
-            colorSoft="bg-mixed/5"
-          >
-            {review.next_action}
-          </Section>
-        </div>
-
+        {/* tags */}
         {review.tags.length > 0 && (
-          <footer className="flex flex-wrap gap-2 border-t border-line pt-4">
+          <div className="tk-karte__tags">
             {review.tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-md border border-line bg-panel-2 px-2 py-1 font-mono text-xs text-muted"
-              >
-                #{tag}
+              <span key={tag} className="tk-karte__tag">
+                {tag}
               </span>
             ))}
-          </footer>
+          </div>
         )}
+
+        {/* pattern warnings */}
+        {warnings.length > 0 && (
+          <div className="tk-karte__pattern">
+            <span className="tk-karte__pattern-label tk-only-desktop-inline">
+              PATTERN
+            </span>
+            <div>
+              {warnings.map((w) => (
+                <span key={w} className="tk-karte__pattern-name">
+                  {w}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </article>
+    </div>
+  );
+}
+
+function Section({
+  n,
+  nColor,
+  title,
+  tag,
+  body,
+  first,
+}: {
+  n: string;
+  nColor: string;
+  title: string;
+  tag: string;
+  body: React.ReactNode;
+  first?: boolean;
+}) {
+  return (
+    <div
+      className={
+        "tk-karte__section" + (first ? " tk-karte__section--first" : "")
+      }
+    >
+      <div className="tk-karte__section-head">
+        <span className="tk-karte__section-n" style={{ color: nColor }}>
+          {n}
+        </span>
+        <span className="tk-karte__section-title">{title}</span>
+        <span className="tk-karte__section-tag tk-only-desktop-inline">
+          {tag}
+        </span>
+        <span className="tk-karte__section-rule" />
       </div>
-    </article>
+      <div className="tk-karte__section-body">{body}</div>
+    </div>
   );
 }

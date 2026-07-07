@@ -24,7 +24,7 @@ export default function Home() {
         </span>
         <Link
           href="/login"
-          className="rounded-lg border border-line px-4 py-2 text-sm hover:border-accent"
+          className="border border-line px-4 py-2 text-sm hover:border-accent"
         >
           ログイン
         </Link>
@@ -34,7 +34,7 @@ export default function Home() {
         <p className="font-mono text-xs tracking-widest text-muted">
           AI TRADE REVIEW / 裁量FXトレーダー向け
         </p>
-        <h1 className="text-3xl font-bold leading-snug sm:text-4xl">
+        <h1 className="font-serif text-3xl font-bold leading-snug tracking-wider sm:text-4xl">
           そのトレード、
           <br />
           <span className="text-accent">判断</span>は正しかったか。
@@ -47,13 +47,13 @@ export default function Home() {
         <div className="flex gap-3">
           <Link
             href="/login"
-            className="rounded-xl bg-accent px-6 py-3 font-semibold text-bg hover:opacity-90"
+            className="bg-accent px-6 py-3 font-semibold text-bg hover:opacity-90"
           >
             無料で始める
           </Link>
           <Link
             href="/app"
-            className="rounded-xl border border-line px-6 py-3 text-sm leading-6 hover:border-accent"
+            className="border border-line px-6 py-3 text-sm leading-6 hover:border-accent"
           >
             まず試す
           </Link>
@@ -64,7 +64,7 @@ export default function Home() {
         {FEATURES.map((f) => (
           <div
             key={f.title}
-            className="rounded-xl border border-line bg-panel p-5"
+            className="border border-line bg-panel p-5"
           >
             <h2 className="mb-2 font-semibold text-accent">{f.title}</h2>
             <p className="text-sm leading-relaxed text-muted">{f.body}</p>

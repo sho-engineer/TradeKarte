@@ -2,7 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import KarteCard from "@/components/KarteCard";
 import { deleteKarte } from "@/app/app/actions";
-import { formatJst, THUMB_BUCKET, type KarteRow } from "@/lib/db";
+import {
+  formatJst,
+  formatRecordNo,
+  THUMB_BUCKET,
+  type KarteRow,
+} from "@/lib/db";
 import { detectPatterns, PATTERN_WINDOW_DAYS } from "@/lib/pattern";
 import type { Review } from "@/lib/review/types";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
@@ -14,9 +19,13 @@ export default async function KarteDetailPage({
 
   if (!isSupabaseConfigured()) {
     return (
-      <p className="text-sm text-muted">
-        カルテ詳細を見るには Supabase の設定とログインが必要です。
-      </p>
+      <div className="tk-page">
+        <div className="tk-page__col tk-card">
+          <p className="tk-history__empty">
+            カルテ詳細を見るには Supabase の設定とログインが必要です。
+          </p>
+        </div>
+      </div>
     );
   }
 
@@ -66,38 +75,39 @@ export default async function KarteDetailPage({
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Link
-          href="/app/history"
-          className="text-sm text-muted hover:text-ink"
-        >
-          ← 履歴に戻る
-        </Link>
-        <form action={deleteKarte}>
-          <input type="hidden" name="id" value={row.id} />
-          <button
-            type="submit"
-            className="rounded-lg border border-impulse/40 px-3 py-1.5 text-xs text-impulse hover:bg-impulse/10"
+    <div className="tk-page">
+      <div className="tk-page__col space-y-5">
+        <div className="flex items-center justify-between">
+          <Link
+            href="/app/history"
+            className="tk-topbar__link"
           >
-            このカルテを削除
-          </button>
-        </form>
-      </div>
+            ← 台帳に戻る
+          </Link>
+          <form action={deleteKarte}>
+            <input type="hidden" name="id" value={row.id} />
+            <button type="submit" className="tk-btn tk-btn--danger-ghost">
+              このカルテを削除
+            </button>
+          </form>
+        </div>
 
-      <KarteCard
-        review={review}
-        warnings={warnings}
-        meta={{
-          emotionPre: row.emotion_pre,
-          createdAt: formatJst(row.created_at),
-          pair: row.pair,
-          direction: row.direction,
-          result: row.result,
-          memo: row.memo,
-          thumbUrl,
-        }}
-      />
+        <KarteCard
+          review={review}
+          warnings={warnings}
+          meta={{
+            recordNo: formatRecordNo(row.created_at, row.seq),
+            createdAt:
+              formatJst(row.created_at).replaceAll("/", ".") + " JST",
+            pair: row.pair,
+            direction: row.direction,
+            result: row.result,
+            emotionPre: row.emotion_pre,
+            memo: row.memo,
+            thumbUrl,
+          }}
+        />
+      </div>
     </div>
   );
 }

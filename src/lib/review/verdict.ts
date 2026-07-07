@@ -1,54 +1,42 @@
 import type { Verdict } from "./types";
 
 export interface VerdictMeta {
-  /** 意味の一言(スタンプ横に表示) */
-  gloss: string;
-  /** 補足説明(凡例・詳細用) */
-  description: string;
-  /** チップ/スタンプの配色クラス */
-  chip: string;
-  /** テキスト色クラス(見出し等) */
-  text: string;
-  /** 左カラーレール等のボーダー色クラス */
-  border: string;
-  /** 淡い背景色クラス */
-  soft: string;
+  /** 判定印の英字ラベル */
+  en: string;
+  /** カルテ見出しに使う一文 */
+  headline: string;
+  /** 判定色(CSS変数) */
+  color: string;
+  /** 弱いボーダー色(CSS変数) */
+  borderColor: string;
 }
 
 export const VERDICT_META: Record<Verdict, VerdictMeta> = {
   エッジ: {
-    gloss: "根拠主導",
-    description: "優位性のある根拠に基づいた判断。",
-    chip: "border-edge/50 bg-edge/15 text-edge",
-    text: "text-edge",
-    border: "border-edge",
-    soft: "bg-edge/10",
+    en: "EDGE",
+    headline: "根拠主導の判断。優位性に基づいた入り。",
+    color: "var(--tk-edge)",
+    borderColor: "var(--tk-edge-border)",
   },
   衝動: {
-    gloss: "感情主導",
-    description: "FOMO・ポジポジ病・リベンジなど感情が主導した判断。",
-    chip: "border-impulse/50 bg-impulse/15 text-impulse",
-    text: "text-impulse",
-    border: "border-impulse",
-    soft: "bg-impulse/10",
+    en: "IMPULSE",
+    headline: "感情主導の入り。値動きへの反応が根拠に先行。",
+    color: "var(--tk-impulse)",
+    borderColor: "var(--tk-impulse-border)",
   },
   混在: {
-    gloss: "根拠と衝動が混在",
-    description: "妥当な根拠と感情的要素が入り混じった判断。",
-    chip: "border-mixed/50 bg-mixed/15 text-mixed",
-    text: "text-mixed",
-    border: "border-mixed",
-    soft: "bg-mixed/10",
+    en: "MIXED",
+    headline: "妥当な根拠と感情的要素が混在した判断。",
+    color: "var(--tk-mixed)",
+    borderColor: "var(--tk-mixed-border)",
   },
 };
 
 const FALLBACK: VerdictMeta = {
-  gloss: "",
-  description: "",
-  chip: "border-line bg-panel-2 text-muted",
-  text: "text-muted",
-  border: "border-line",
-  soft: "bg-panel-2",
+  en: "",
+  headline: "",
+  color: "var(--tk-text-weak)",
+  borderColor: "var(--tk-rule)",
 };
 
 export function verdictMeta(verdict: string): VerdictMeta {

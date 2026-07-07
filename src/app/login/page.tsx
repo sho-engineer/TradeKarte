@@ -38,7 +38,7 @@ function LoginForm() {
 
   if (sent) {
     return (
-      <div className="rounded-xl border border-line bg-panel p-6 text-center">
+      <div className="border border-line bg-panel p-6 text-center">
         <p className="font-semibold text-accent">メールを送信しました</p>
         <p className="mt-2 text-sm text-muted">
           {email} 宛のログインリンクを開いてください。
@@ -50,7 +50,7 @@ function LoginForm() {
   return (
     <form onSubmit={submit} className="space-y-4">
       {authError && (
-        <p className="rounded-lg border border-impulse/40 bg-impulse/10 px-4 py-3 text-sm text-impulse">
+        <p className="border border-impulse/40 bg-impulse/10 px-4 py-3 text-sm text-impulse">
           ログインリンクが無効か期限切れです。もう一度お試しください。
         </p>
       )}
@@ -60,12 +60,12 @@ function LoginForm() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="メールアドレス"
-        className="w-full rounded-xl border border-line bg-panel px-4 py-3 text-sm placeholder:text-muted/70 focus:border-accent focus:outline-none"
+        className="w-full border border-line bg-panel px-4 py-3 text-sm placeholder:text-muted/70 focus:border-accent focus:outline-none"
       />
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-xl bg-accent px-4 py-3 font-semibold text-bg hover:opacity-90 disabled:opacity-40"
+        className="w-full bg-accent px-4 py-3 font-semibold text-bg hover:opacity-90 disabled:opacity-40"
       >
         {loading ? "送信中…" : "ログインリンクを送る"}
       </button>

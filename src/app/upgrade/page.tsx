@@ -15,7 +15,7 @@ export default function UpgradePage() {
       </p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border border-line bg-panel p-6">
+        <div className="border border-line bg-panel p-6">
           <h2 className="font-mono text-sm tracking-wider text-muted">FREE</h2>
           <p className="mt-2 text-3xl font-bold">
             ¥0
@@ -28,7 +28,7 @@ export default function UpgradePage() {
           </ul>
         </div>
 
-        <div className="rounded-xl border border-accent/50 bg-panel p-6">
+        <div className="border border-accent/50 bg-panel p-6">
           <h2 className="font-mono text-sm tracking-wider text-accent">PRO</h2>
           <p className="mt-2 text-3xl font-bold">
             ¥980
@@ -44,14 +44,14 @@ export default function UpgradePage() {
           {CHECKOUT_URL ? (
             <a
               href={CHECKOUT_URL}
-              className="mt-6 block rounded-xl bg-accent px-4 py-3 text-center font-semibold text-bg hover:opacity-90"
+              className="mt-6 block bg-accent px-4 py-3 text-center font-semibold text-bg hover:opacity-90"
             >
               Pro にアップグレード
             </a>
           ) : (
             <button
               disabled
-              className="mt-6 w-full cursor-not-allowed rounded-xl bg-accent/30 px-4 py-3 font-semibold text-bg/70"
+              className="mt-6 w-full cursor-not-allowed bg-accent/30 px-4 py-3 font-semibold text-bg/70"
             >
               準備中
             </button>
