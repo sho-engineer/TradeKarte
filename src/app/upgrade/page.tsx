@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-const FREE_LIMIT = process.env.FREE_MONTHLY_LIMIT ?? "10";
+const FREE_LIMIT = process.env.FREE_MONTHLY_LIMIT ?? "5";
 const CHECKOUT_URL = process.env.NEXT_PUBLIC_STRIPE_CHECKOUT_URL;
 
 export default function UpgradePage() {

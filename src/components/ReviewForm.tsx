@@ -57,7 +57,7 @@ export default function ReviewForm() {
   const intakeNo = useMemo(() => {
     const d = new Date();
     const p = (n: number) => String(n).padStart(2, "0");
-    return `TK-${d.getFullYear()}-${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`;
+    return `PJ-${d.getFullYear()}-${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`;
   }, []);
 
   const acceptFile = useCallback((f: File | undefined | null) => {

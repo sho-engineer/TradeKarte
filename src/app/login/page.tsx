@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Mark from "@/components/brand/Mark";
+import Wordmark from "@/components/brand/Wordmark";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 function LoginForm() {
@@ -82,9 +84,10 @@ export default function LoginPage() {
     <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-6 py-16">
       <Link
         href="/"
-        className="mb-8 text-center font-mono text-lg font-bold text-accent"
+        className="mb-8 flex items-center justify-center gap-2 font-mono text-lg font-bold text-ink"
       >
-        TradeKarte
+        <Mark size={22} />
+        <Wordmark />
       </Link>
       <Suspense>
         <LoginForm />

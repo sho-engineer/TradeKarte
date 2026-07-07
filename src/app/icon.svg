@@ -1,0 +1,21 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="400" fill="#0E1116"/>
+  <defs>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0E1116" stop-opacity="0"/>
+      <stop offset="0.85" stop-color="#0E1116" stop-opacity="0.92"/>
+      <stop offset="1" stop-color="#0E1116" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+  <!-- 上：ポジ（ローソク足） -->
+  <line x1="200" y1="58" x2="200" y2="188" stroke="#6FC0CB" stroke-width="12" stroke-linecap="round"/>
+  <rect x="165" y="96" width="70" height="72" rx="12" fill="#5EA8B3"/>
+  <!-- 下：反射（ミル） -->
+  <g opacity="0.6">
+    <line x1="200" y1="212" x2="200" y2="342" stroke="#6FC0CB" stroke-width="12" stroke-linecap="round"/>
+    <rect x="165" y="232" width="70" height="72" rx="12" fill="#5EA8B3"/>
+  </g>
+  <rect x="0" y="200" width="400" height="200" fill="url(#fade)"/>
+  <!-- 鏡面（エントリーマーカーと同じ点線モチーフ） -->
+  <line x1="70" y1="200" x2="330" y2="200" stroke="#5EA8B3" stroke-width="4" stroke-dasharray="10 9" opacity="0.9"/>
+</svg>

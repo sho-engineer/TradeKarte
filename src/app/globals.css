@@ -1,44 +1,46 @@
 @import "tailwindcss";
 
 /* ============================================================
-   TradeKarte design tokens — 墨×朱ダーク・エディトリアル
-   (Claude Design プロトタイプ tokens.css より移植)
+   ポジミル design tokens
+   ブランド面(ロゴ・ヘッダー・ボタン・リンク)は teal 一本。
+   edge/impulse/mix は判定チップ/パターン警告でのみ使う機能色。
    ============================================================ */
 :root {
-  /* 墨 (ink) — backgrounds */
-  --tk-bg: #0d0b0a;
-  --tk-surface: #14110f;
-  --tk-surface-alt: #1b1714;
-  --tk-surface-raised: #221d19;
+  /* ink — backgrounds */
+  --tk-bg: #0e1116;
+  --tk-surface: #161b22;
+  --tk-surface-alt: #1c232c;
+  --tk-surface-raised: #222a34;
 
   /* text */
-  --tk-text: #e8e2d6;
-  --tk-text-dim: #c9c1b3;
-  --tk-text-weak: #8f8577;
-  --tk-text-faint: #6b6157;
+  --tk-text: #e7eaee;
+  --tk-text-dim: #c7cdd6;
+  --tk-text-weak: #8a93a0;
+  --tk-text-faint: #5c6470;
 
   /* rules */
-  --tk-rule: #38302a;
-  --tk-rule-dim: #221d19;
+  --tk-rule: #262e38;
+  --tk-rule-dim: #1b212a;
 
-  /* 朱 (vermillion) — primary accent */
-  --tk-vermillion: #d0472f;
-  --tk-vermillion-border: #4a2c25;
-  --tk-vermillion-wash: rgba(208, 71, 47, 0.05);
-  --tk-vermillion-wash-strong: rgba(208, 71, 47, 0.2);
+  /* teal — ブランド色(唯一) */
+  --tk-teal: #5ea8b3;
+  --tk-teal-hi: #6fc0cb;
+  --tk-teal-border: #2a4448;
+  --tk-teal-wash: rgba(94, 168, 179, 0.05);
+  --tk-teal-wash-strong: rgba(94, 168, 179, 0.2);
 
-  /* verdict colors */
-  --tk-edge: #6f8f6a;
-  --tk-edge-border: #3a4636;
-  --tk-impulse: #d0472f;
-  --tk-impulse-border: #4a2c25;
-  --tk-mixed: #c69a3e;
-  --tk-mixed-border: #5a4a2e;
+  /* verdict colors(機能色。ブランド装飾には使わない) */
+  --tk-edge: #5fb98c;
+  --tk-edge-border: #2a4238;
+  --tk-impulse: #d98b6a;
+  --tk-impulse-border: #4a392e;
+  --tk-mixed: #9aa3ae;
+  --tk-mixed-border: #40454c;
 
   /* type */
-  --tk-font-serif: var(--font-shippori-mincho), "Shippori Mincho", serif;
   --tk-font-sans: var(--font-noto-sans-jp), "Noto Sans JP", sans-serif;
   --tk-font-mono: var(--font-jetbrains-mono), "JetBrains Mono", monospace;
+  --tk-font-wordmark: var(--font-manrope), "Manrope", sans-serif;
 
   /* --- 旧トークン名のエイリアス(ランディング/ログイン/プラン等が参照) --- */
   --bg: var(--tk-bg);
@@ -49,9 +51,9 @@
   --ink: var(--tk-text);
   --muted: var(--tk-text-weak);
   --line: var(--tk-rule);
-  --line-strong: #4a4038;
-  --accent: var(--tk-vermillion);
-  --accent-dim: #8a3322;
+  --line-strong: #33414d;
+  --accent: var(--tk-teal);
+  --accent-dim: var(--tk-teal-border);
   --edge: var(--tk-edge);
   --impulse: var(--tk-impulse);
   --mixed: var(--tk-mixed);
@@ -73,8 +75,8 @@
   --color-impulse: var(--impulse);
   --color-mixed: var(--mixed);
   --font-sans: var(--tk-font-sans);
-  --font-serif: var(--tk-font-serif);
   --font-mono: var(--tk-font-mono);
+  --font-wordmark: var(--tk-font-wordmark);
 }
 
 html {
@@ -89,12 +91,12 @@ body {
 }
 
 ::selection {
-  background: var(--tk-vermillion-wash-strong);
+  background: var(--tk-teal-wash-strong);
   color: var(--tk-text);
 }
 
 :focus-visible {
-  outline: 2px solid var(--tk-vermillion);
+  outline: 2px solid var(--tk-teal);
   outline-offset: 2px;
 }
 
@@ -187,21 +189,21 @@ body {
 }
 .tk-btn--danger-ghost {
   font-size: 11px;
-  color: var(--tk-vermillion);
+  color: var(--tk-impulse);
   background: none;
-  border: 1px solid var(--tk-vermillion-border);
+  border: 1px solid var(--tk-impulse-border);
   padding: 6px 12px;
 }
 .tk-btn--danger-ghost:hover {
-  background: var(--tk-vermillion-wash);
+  background: rgba(217, 139, 106, 0.08);
 }
 .tk-btn--primary {
-  font-family: var(--tk-font-serif);
+  font-family: var(--tk-font-sans);
   font-weight: 700;
   font-size: 16px;
   letter-spacing: 0.14em;
   color: var(--tk-bg);
-  background: var(--tk-vermillion);
+  background: var(--tk-teal);
   border: none;
   padding: 14px 34px;
 }
@@ -232,8 +234,8 @@ button.tk-pill:hover {
 .tk-pill--active,
 button.tk-pill--active:hover {
   color: var(--tk-bg);
-  background: var(--tk-vermillion);
-  border-color: var(--tk-vermillion);
+  background: var(--tk-teal);
+  border-color: var(--tk-teal);
 }
 
 /* ============================================================
@@ -262,6 +264,12 @@ button.tk-pill--active:hover {
 .tk-topbar__brand:hover {
   color: var(--tk-text);
 }
+.tk-topbar__brand--mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.2em;
+}
 .tk-topbar__nav {
   display: flex;
   gap: 18px;
@@ -280,8 +288,8 @@ button.tk-pill--active:hover {
   color: var(--tk-text);
 }
 .tk-topbar__link--active {
-  color: var(--tk-vermillion);
-  border-bottom-color: var(--tk-vermillion);
+  color: var(--tk-teal);
+  border-bottom-color: var(--tk-teal);
 }
 .tk-topbar__meta {
   font-family: var(--tk-font-mono);
@@ -303,8 +311,8 @@ button.tk-pill--active:hover {
   cursor: pointer;
 }
 .tk-topbar__signout:hover {
-  color: var(--tk-vermillion);
-  border-bottom-color: var(--tk-vermillion);
+  color: var(--tk-teal);
+  border-bottom-color: var(--tk-teal);
 }
 @media (max-width: 640px) {
   .tk-topbar__inner {
@@ -341,14 +349,14 @@ button.tk-pill--active:hover {
    ============================================================ */
 .tk-input__masthead {
   padding: 26px 30px 18px;
-  border-bottom: 2px solid var(--tk-vermillion);
+  border-bottom: 2px solid var(--tk-teal);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
 }
 .tk-input__title {
-  font-family: var(--tk-font-serif);
+  font-family: var(--tk-font-sans);
   font-size: 23px;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -379,7 +387,7 @@ button.tk-pill--active:hover {
 }
 .tk-input__label--accent {
   font-size: 11px;
-  color: var(--tk-vermillion);
+  color: var(--tk-teal);
 }
 .tk-input__label-note {
   color: var(--tk-text-faint);
@@ -397,11 +405,11 @@ button.tk-pill--active:hover {
   text-align: center;
 }
 .tk-input__dropzone--drag {
-  border-color: var(--tk-vermillion);
-  background: var(--tk-vermillion-wash);
+  border-color: var(--tk-teal);
+  background: var(--tk-teal-wash);
 }
 .tk-input__dropzone-cta {
-  font-family: var(--tk-font-serif);
+  font-family: var(--tk-font-sans);
   font-size: 14px;
   color: var(--tk-text-dim);
   letter-spacing: 0.06em;
@@ -482,7 +490,7 @@ button.tk-pill--active:hover {
   background: var(--tk-surface-alt);
   padding: 14px 16px;
   min-height: 84px;
-  font-family: var(--tk-font-serif);
+  font-family: var(--tk-font-sans);
   font-size: 14px;
   color: var(--tk-text-dim);
   line-height: 1.8;
@@ -493,7 +501,7 @@ button.tk-pill--active:hover {
 }
 .tk-textarea:focus {
   outline: none;
-  border-color: var(--tk-vermillion);
+  border-color: var(--tk-teal);
 }
 
 /* emotion pills (F1) */
@@ -531,7 +539,7 @@ button.tk-pill--active:hover {
   width: 100%;
   border: none;
   background: transparent;
-  font-family: var(--tk-font-serif);
+  font-family: var(--tk-font-sans);
   font-size: 15px;
   color: var(--tk-text);
   margin-top: 6px;
@@ -598,8 +606,8 @@ button.tk-pill--active:hover {
 /* error + submit */
 .tk-input__error {
   margin: 14px 30px 0;
-  border-left: 3px solid var(--tk-vermillion);
-  background: var(--tk-vermillion-wash);
+  border-left: 3px solid var(--tk-impulse);
+  background: rgba(217, 139, 106, 0.06);
   padding: 12px 16px;
   font-size: 13px;
   color: var(--tk-text-dim);
@@ -652,7 +660,7 @@ button.tk-pill--active:hover {
   align-items: baseline;
 }
 .tk-loading__title {
-  font-family: var(--tk-font-serif);
+  font-family: var(--tk-font-sans);
   font-size: 19px;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -728,7 +736,7 @@ button.tk-pill--active:hover {
   text-align: center;
 }
 .tk-loading__footer-line {
-  font-family: var(--tk-font-serif);
+  font-family: var(--tk-font-sans);
   font-size: 14px;
   color: var(--tk-text-dim);
   letter-spacing: 0.06em;
@@ -752,7 +760,7 @@ button.tk-pill--active:hover {
   justify-content: center;
   border-style: solid;
   border-radius: 50%;
-  font-family: var(--tk-font-serif);
+  font-family: var(--tk-font-sans);
   font-weight: 800;
   white-space: nowrap;
 }
@@ -839,14 +847,14 @@ button.tk-pill--active:hover {
 
 .tk-karte__masthead {
   padding: 30px 34px 20px;
-  border-bottom: 2px solid var(--tk-vermillion);
+  border-bottom: 2px solid var(--tk-teal);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
 }
 .tk-karte__title {
-  font-family: var(--tk-font-serif);
+  font-family: var(--tk-font-sans);
   color: var(--tk-text);
   font-size: 26px;
   font-weight: 800;
@@ -881,7 +889,7 @@ button.tk-pill--active:hover {
   font-family: var(--tk-font-mono);
   font-size: 11px;
   letter-spacing: 0.22em;
-  color: var(--tk-vermillion);
+  color: var(--tk-teal);
 }
 .tk-karte__specimen-meta {
   font-family: var(--tk-font-mono);
@@ -908,7 +916,7 @@ button.tk-pill--active:hover {
   margin-bottom: 6px;
 }
 .tk-karte__memo-text {
-  font-family: var(--tk-font-serif);
+  font-family: var(--tk-font-sans);
   color: var(--tk-text-dim);
   font-size: 14px;
   line-height: 1.8;
@@ -929,7 +937,7 @@ button.tk-pill--active:hover {
   color: var(--tk-text-weak);
 }
 .tk-karte__verdict-headline {
-  font-family: var(--tk-font-serif);
+  font-family: var(--tk-font-sans);
   color: var(--tk-text);
   font-size: 22px;
   font-weight: 700;
@@ -974,7 +982,7 @@ button.tk-pill--active:hover {
   color: var(--tk-text-weak);
 }
 .tk-karte__meta-value {
-  font-family: var(--tk-font-serif);
+  font-family: var(--tk-font-sans);
   color: var(--tk-text);
   font-size: 16px;
   margin-top: 6px;
@@ -1004,7 +1012,7 @@ button.tk-pill--active:hover {
   font-weight: 700;
 }
 .tk-karte__section-title {
-  font-family: var(--tk-font-serif);
+  font-family: var(--tk-font-sans);
   color: var(--tk-text);
   font-size: 16px;
   font-weight: 700;
@@ -1048,7 +1056,7 @@ button.tk-pill--active:hover {
 
 .tk-karte__pattern {
   margin: 22px 34px 30px;
-  border-left: 3px solid var(--tk-vermillion);
+  border-left: 3px solid var(--tk-impulse);
   background: var(--tk-surface-raised);
   padding: 14px 18px;
   display: flex;
@@ -1059,13 +1067,13 @@ button.tk-pill--active:hover {
   font-family: var(--tk-font-mono);
   font-size: 10px;
   letter-spacing: 0.16em;
-  color: var(--tk-vermillion);
+  color: var(--tk-impulse);
   flex-shrink: 0;
 }
 .tk-karte__pattern-name {
   display: block;
-  font-family: var(--tk-font-serif);
-  color: var(--tk-vermillion);
+  font-family: var(--tk-font-sans);
+  color: var(--tk-impulse);
   font-size: 14px;
   font-weight: 700;
   line-height: 1.8;
@@ -1185,14 +1193,14 @@ button.tk-pill--active:hover {
    ============================================================ */
 .tk-history__head {
   padding: 22px 30px 16px;
-  border-bottom: 2px solid var(--tk-vermillion);
+  border-bottom: 2px solid var(--tk-teal);
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   gap: 12px;
 }
 .tk-history__title {
-  font-family: var(--tk-font-serif);
+  font-family: var(--tk-font-sans);
   font-size: 22px;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -1269,7 +1277,7 @@ button.tk-pill--active:hover {
   color: var(--tk-text-weak);
 }
 .tk-history__summary {
-  font-family: var(--tk-font-serif);
+  font-family: var(--tk-font-sans);
   font-size: 14px;
   color: var(--tk-text-dim);
   line-height: 1.6;
@@ -1307,7 +1315,7 @@ button.tk-pill--active:hover {
   align-items: baseline;
 }
 .tk-history__summary-mobile {
-  font-family: var(--tk-font-serif);
+  font-family: var(--tk-font-sans);
   font-size: 13px;
   color: var(--tk-text-dim);
   line-height: 1.55;
@@ -1320,12 +1328,12 @@ button.tk-pill--active:hover {
 .tk-history__empty {
   padding: 40px 30px;
   text-align: center;
-  font-family: var(--tk-font-serif);
+  font-family: var(--tk-font-sans);
   font-size: 14px;
   color: var(--tk-text-weak);
 }
 .tk-history__empty a {
-  color: var(--tk-vermillion);
+  color: var(--tk-teal);
 }
 
 @media (max-width: 640px) {

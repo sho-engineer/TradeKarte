@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppNav from "@/components/AppNav";
+import Mark from "@/components/brand/Mark";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
 export default async function AppLayout({
@@ -18,8 +19,9 @@ export default async function AppLayout({
     <div className="flex min-h-full flex-1 flex-col">
       <header className="tk-topbar">
         <div className="tk-topbar__inner">
-          <Link href="/" className="tk-topbar__brand">
-            TRADEKARTE
+          <Link href="/" className="tk-topbar__brand tk-topbar__brand--mark">
+            <Mark size={18} />
+            ポジミル
           </Link>
           <AppNav />
           <div className="tk-topbar__meta">

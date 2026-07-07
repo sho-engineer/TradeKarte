@@ -23,14 +23,14 @@ export interface KarteRow {
 
 export const THUMB_BUCKET = "karte-thumbs";
 
-/** 台帳用のカルテ番号(例: TK-20260731-014) */
+/** 台帳用のカルテ番号(例: PJ-20260731-014) */
 export function formatRecordNo(createdAt: string, seq: number | null): string {
   const d = new Date(createdAt);
   const p = (n: number) => String(n).padStart(2, "0");
   const date = `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}`;
   return seq != null
-    ? `TK-${date}-${String(seq).padStart(3, "0")}`
-    : `TK-${date}`;
+    ? `PJ-${date}-${String(seq).padStart(3, "0")}`
+    : `PJ-${date}`;
 }
 
 export function formatJst(iso: string): string {

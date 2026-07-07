@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Mark from "@/components/brand/Mark";
+import Wordmark from "@/components/brand/Wordmark";
 
 const FEATURES = [
   {
@@ -19,9 +21,12 @@ export default function Home() {
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-16">
       <header className="flex items-center justify-between">
-        <span className="font-mono text-lg font-bold text-accent">
-          TradeKarte
-        </span>
+        <Link href="/" className="flex items-center gap-2">
+          <Mark size={28} />
+          <span className="font-mono text-lg font-bold text-ink">
+            <Wordmark />
+          </span>
+        </Link>
         <Link
           href="/login"
           className="border border-line px-4 py-2 text-sm hover:border-accent"
@@ -34,10 +39,11 @@ export default function Home() {
         <p className="font-mono text-xs tracking-widest text-muted">
           AI TRADE REVIEW / 裁量FXトレーダー向け
         </p>
-        <h1 className="font-serif text-3xl font-bold leading-snug tracking-wider sm:text-4xl">
-          そのトレード、
+        <h1 className="text-3xl font-bold leading-snug tracking-wide sm:text-4xl">
+          そのポジは、
           <br />
-          <span className="text-accent">判断</span>は正しかったか。
+          <span className="text-accent">エッジ</span>か
+          <span className="text-impulse">衝動</span>か。
         </h1>
         <p className="max-w-xl leading-relaxed text-muted">
           チャート画像と一言メモを投げるだけ。AIがあなたの売買の
@@ -74,7 +80,7 @@ export default function Home() {
 
       <footer className="mt-20 border-t border-line pt-6 text-xs leading-relaxed text-muted">
         <p>
-          TradeKarte
+          ポジミル
           は過去のトレードの振り返りを支援するツールです。将来の値動きの予測、売買の推奨・助言は一切行いません。投資判断はご自身の責任で行ってください。
         </p>
       </footer>

@@ -9,6 +9,7 @@ import {
 import { isMockMode, mockReview } from "@/lib/review/mock";
 import type { ReviewRequestBody, ReviewResponseBody } from "@/lib/review/types";
 import { detectPatterns, patternWindowStart } from "@/lib/pattern";
+import { checkBurstRateLimit } from "@/lib/rateLimit";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -25,7 +26,7 @@ const THUMB_BUCKET = "karte-thumbs";
 
 function freeMonthlyLimit(): number {
   const n = Number(process.env.FREE_MONTHLY_LIMIT);
-  return Number.isFinite(n) && n > 0 ? n : 10;
+  return Number.isFinite(n) && n > 0 ? n : 5;
 }
 
 function parseDataUrl(
@@ -88,6 +89,18 @@ export async function POST(request: NextRequest) {
       );
     }
     userId = user.id;
+
+    // per-user バースト制限(連打・スクリプト濫用対策。月間無料枠とは別ゲート)
+    const burst = await checkBurstRateLimit(supabase, userId);
+    if (burst.limited) {
+      return NextResponse.json(
+        { error: "短時間に依頼しすぎです。少し間を空けてお試しください。" },
+        {
+          status: 429,
+          headers: { "Retry-After": String(burst.retryAfterSeconds) },
+        },
+      );
+    }
 
     const monthStart = new Date();
     monthStart.setDate(1);

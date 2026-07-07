@@ -141,7 +141,7 @@ export default function KarteCard({
         />
         <Section
           n="02"
-          nColor="var(--tk-vermillion)"
+          nColor="var(--tk-impulse)"
           title="指摘"
           tag="CRITIC"
           body={review.critic}
