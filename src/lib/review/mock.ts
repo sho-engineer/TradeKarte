@@ -5,7 +5,7 @@ export function isMockMode(): boolean {
   return process.env.MOCK_REVIEW === "1";
 }
 
-export function mockReview(): Review {
+export function mockReview(emotionPre?: string): Review {
   return {
     verdict: "混在",
     coach:
@@ -15,5 +15,7 @@ export function mockReview(): Review {
     next_action:
       "次回は同じ状況でも、エントリー前に「今の動機は根拠か感情か」を一度言語化する習慣を持つ。",
     tags: ["USD/JPY", "東京時間", "レンジブレイク", "リベンジ"],
+    // 固定レビューはリベンジ心理を指摘する内容なので、「冷静」「興奮」の自己申告とはズレ扱い
+    emotion_gap: emotionPre === "冷静" || emotionPre === "興奮",
   };
 }

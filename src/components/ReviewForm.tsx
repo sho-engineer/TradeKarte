@@ -7,7 +7,11 @@ import {
   MAIN_IMAGE_MAX_EDGE,
   THUMB_MAX_EDGE,
 } from "@/lib/image";
-import type { Review, ReviewResponseBody } from "@/lib/review/types";
+import {
+  EMOTIONS,
+  type Review,
+  type ReviewResponseBody,
+} from "@/lib/review/types";
 import { VERDICT_META } from "@/lib/review/verdict";
 import KarteCard from "./KarteCard";
 
@@ -32,6 +36,7 @@ export default function ReviewForm() {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [memo, setMemo] = useState("");
+  const [emotion, setEmotion] = useState("");
   const [pair, setPair] = useState("");
   const [direction, setDirection] = useState("");
   const [result, setResult] = useState("");
@@ -86,7 +91,15 @@ export default function ReviewForm() {
       const res = await fetch("/api/review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image, thumb, memo, pair, direction, result }),
+        body: JSON.stringify({
+          image,
+          thumb,
+          memo,
+          pair,
+          direction,
+          result,
+          emotion_pre: emotion || undefined,
+        }),
       });
       const data = (await res.json()) as ReviewResponseBody & {
         error?: string;
@@ -232,6 +245,39 @@ export default function ReviewForm() {
           />
           <div className="mt-1 text-right font-mono text-[11px] text-muted">
             {memo.length} / {MEMO_MAX}
+          </div>
+        </div>
+
+        {/* F1: エントリー前の自己申告感情(任意・1タップ) */}
+        <div>
+          <span className="mb-1.5 block font-mono text-[11px] uppercase tracking-wider text-muted">
+            エントリー前の感情
+            <span className="ml-1.5 normal-case tracking-normal text-muted/70">
+              任意・もう一度タップで解除
+            </span>
+          </span>
+          <div className="flex flex-wrap gap-2" role="group" aria-label="エントリー前の感情">
+            {EMOTIONS.map(({ value, emoji }) => {
+              const selected = emotion === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => setEmotion(selected ? "" : value)}
+                  className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                    selected
+                      ? "border-accent bg-accent/10 text-ink"
+                      : "border-line bg-panel text-muted hover:border-line-strong hover:text-ink"
+                  }`}
+                >
+                  <span aria-hidden className="mr-1">
+                    {emoji}
+                  </span>
+                  {value}
+                </button>
+              );
+            })}
           </div>
         </div>
 

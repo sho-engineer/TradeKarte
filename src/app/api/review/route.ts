@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
 import {
   generateReview,
+  pickPromptFields,
   ReviewError,
   type ImageMediaType,
 } from "@/lib/review/claude";
@@ -20,7 +21,6 @@ const ALLOWED_MEDIA_TYPES: ImageMediaType[] = [
 ];
 // 長辺1280px/JPEG q0.85 なら余裕をもって収まるサイズ
 const MAX_IMAGE_BASE64_LENGTH = 8_000_000;
-const MAX_MEMO_LENGTH = 2000;
 const THUMB_BUCKET = "karte-thumbs";
 
 function freeMonthlyLimit(): number {
@@ -68,7 +68,9 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
-  const memo = typeof body.memo === "string" ? body.memo.slice(0, MAX_MEMO_LENGTH) : "";
+
+  // プロンプトに渡すのはホワイトリスト済みの項目のみ(損益系は判定と独立の原則で混入させない)
+  const fields = pickPromptFields(body);
 
   // Supabase 設定済みなら認証+無料枠チェック。未設定なら保存なしのお試しモードで動作。
   const supabaseEnabled = isSupabaseConfigured();
@@ -115,14 +117,11 @@ export async function POST(request: NextRequest) {
   let review;
   try {
     review = isMockMode()
-      ? mockReview()
+      ? mockReview(fields.emotionPre)
       : await generateReview({
           imageMediaType: image.mediaType,
           imageBase64: image.base64,
-          memo,
-          pair: sanitizeShort(body.pair),
-          direction: sanitizeShort(body.direction),
-          result: sanitizeShort(body.result),
+          ...fields,
         });
   } catch (err) {
     if (err instanceof ReviewError) {
@@ -168,20 +167,33 @@ export async function POST(request: NextRequest) {
       else console.error("thumbnail upload failed:", uploadError.message);
     }
 
+    // F4(行動連鎖)用に直前カルテと通し番号をサーバー側で自動設定
+    const { data: prev } = await supabase
+      .from("karte")
+      .select("id, seq")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
     const { data: inserted, error: insertError } = await supabase
       .from("karte")
       .insert({
         user_id: userId,
         image_thumb_url: thumbPath,
-        pair: sanitizeShort(body.pair) ?? null,
-        direction: sanitizeShort(body.direction) ?? null,
-        result: sanitizeShort(body.result) ?? null,
-        memo,
+        pair: fields.pair ?? null,
+        direction: fields.direction ?? null,
+        result: fields.result ?? null,
+        memo: fields.memo,
+        emotion_pre: fields.emotionPre ?? null,
         verdict: review.verdict,
+        emotion_gap: review.emotion_gap,
         coach: review.coach,
         critic: review.critic,
         next_action: review.next_action,
         tags: review.tags,
+        prev_karte_id: prev?.id ?? null,
+        seq: (prev?.seq ?? 0) + 1,
       })
       .select("id")
       .single();
@@ -193,19 +205,16 @@ export async function POST(request: NextRequest) {
 
     const { data: history } = await supabase
       .from("karte")
-      .select("tags, verdict")
+      .select("tags, verdict, emotion_gap")
       .eq("user_id", userId)
       .gte("created_at", patternWindowStart())
       .neq("id", karteId ?? "00000000-0000-0000-0000-000000000000");
-    warnings = detectPatterns(review, history ?? []);
+    warnings = detectPatterns(
+      { tags: review.tags, verdict: review.verdict, emotionGap: review.emotion_gap },
+      history ?? [],
+    );
   }
 
   const responseBody: ReviewResponseBody = { review, karteId, warnings };
   return NextResponse.json(responseBody);
-}
-
-function sanitizeShort(value: unknown): string | undefined {
-  if (typeof value !== "string") return undefined;
-  const trimmed = value.trim().slice(0, 40);
-  return trimmed === "" ? undefined : trimmed;
 }

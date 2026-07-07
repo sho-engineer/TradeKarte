@@ -34,7 +34,7 @@ cp .env.example .env.local
 ### 3. Supabase(認証・保存を使う場合)
 
 1. [Supabase](https://supabase.com/) でプロジェクトを作成
-2. SQL Editor で `supabase/migrations/0001_init.sql` を実行(karte テーブル、RLS、サムネイル用 Storage バケットが作成されます)
+2. SQL Editor で `supabase/migrations/` の SQL を番号順に実行(0001: karte テーブル・RLS・Storage バケット / 0002: 機能設計書v2 対応の列と pattern_alert テーブル)
 3. Authentication → URL Configuration で Site URL とリダイレクトURL(`http://localhost:3000/auth/callback` と本番URL)を設定
 4. ログインはメールのマジックリンク方式(パスワード不要)
 
@@ -56,11 +56,13 @@ npm run dev
 
 ## 機能メモ
 
-- **判定は損益と独立**: エントリー時点で見えていた情報のみで「エッジ/衝動/混在」を判定。後知恵禁止をプロンプトで強制
-- **パターン検出**: 直近30日で同じタグ or 「衝動」判定が3回以上繰り返されるとカルテ上に警告バナー
+- **判定は損益と独立**: エントリー時点で見えていた情報のみで「エッジ/衝動/混在」を判定。後知恵禁止をプロンプトで強制。pnl系の値がプロンプトに混入しないことは `npm test`(vitest)で担保
+- **感情セルフタグ(F1)**: エントリー前の感情を1タップで自己申告(任意)。AIが実際の行動との乖離を判定し、ズレがあればカルテに「自己認識とズレ」バッジ+criticで指摘
+- **パターン検出**: 直近30日で同じタグ / 「衝動」判定 / 自己認識のズレが3回以上繰り返されるとカルテ上に警告バナー
 - **無料枠**: `/api/review` 側で月あたり `FREE_MONTHLY_LIMIT` 回(既定10回)に制限
 - **コスト制御**: 画像はクライアント側で長辺1280px/JPEG q0.85 に縮小してから送信。履歴用に460pxサムネイルを別途生成し Supabase Storage(非公開バケット+署名URL)に保存
 - **課金導線**: `/upgrade` はスタブ。`NEXT_PUBLIC_STRIPE_CHECKOUT_URL` を設定すると Stripe Checkout へのリンクが有効化
+- **将来機能**: `docs/feature-design-v2.md` 参照。F2 約定履歴スクショ読み取り(`/api/extract`)・F3 Ask Karte(`/api/ask`)・F4 行動連鎖パターン検出(`/api/patterns/scan`)はエンドポイントのみ切ってあり、現状 501 を返す。スキーマ(列・pattern_alert)は 0002 で対応済み
 
 ## 規制上の制約
 

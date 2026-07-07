@@ -1,11 +1,19 @@
 export interface PatternSource {
   tags: string[] | null;
   verdict: string | null;
+  emotion_gap?: boolean | null;
 }
 
-/** 直近30日で同じタグ/「衝動」判定が繰り返されていたら警告文を返す(current 自身を1回目として数える) */
+export interface PatternCurrent {
+  tags: string[];
+  verdict: string;
+  /** F1: 自己申告感情とAI判定のズレ */
+  emotionGap?: boolean;
+}
+
+/** 直近30日で同じタグ/「衝動」判定/認識ズレが繰り返されていたら警告文を返す(current 自身を1回目として数える) */
 export function detectPatterns(
-  current: { tags: string[]; verdict: string },
+  current: PatternCurrent,
   history: PatternSource[],
   threshold = 3,
 ): string[] {
@@ -22,6 +30,16 @@ export function detectPatterns(
     const count = history.filter((h) => h.verdict === "衝動").length + 1;
     if (count >= threshold) {
       warnings.push(`判定「衝動」:直近30日で${count}回目`);
+    }
+  }
+
+  // F1: 認識ズレ反復(自己申告とAI判定の乖離が繰り返されている)
+  if (current.emotionGap === true) {
+    const count = history.filter((h) => h.emotion_gap === true).length + 1;
+    if (count >= threshold) {
+      warnings.push(
+        `自己申告とAI判定のズレ:直近30日で${count}回目。エントリー前の状態認識に癖があります`,
+      );
     }
   }
 

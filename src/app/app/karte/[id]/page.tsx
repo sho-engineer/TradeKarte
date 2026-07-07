@@ -44,7 +44,7 @@ export default async function KarteDetailPage({
   ).toISOString();
   const { data: history } = await supabase
     .from("karte")
-    .select("tags, verdict")
+    .select("tags, verdict, emotion_gap")
     .lte("created_at", row.created_at)
     .gte("created_at", windowStart)
     .neq("id", row.id);
@@ -54,8 +54,16 @@ export default async function KarteDetailPage({
     critic: row.critic,
     next_action: row.next_action,
     tags: row.tags,
+    emotion_gap: row.emotion_gap ?? false,
   };
-  const warnings = detectPatterns(review, history ?? []);
+  const warnings = detectPatterns(
+    {
+      tags: review.tags,
+      verdict: review.verdict,
+      emotionGap: review.emotion_gap,
+    },
+    history ?? [],
+  );
 
   return (
     <div className="space-y-6">
@@ -81,6 +89,7 @@ export default async function KarteDetailPage({
         review={review}
         warnings={warnings}
         meta={{
+          emotionPre: row.emotion_pre,
           createdAt: formatJst(row.created_at),
           pair: row.pair,
           direction: row.direction,

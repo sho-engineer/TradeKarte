@@ -17,8 +17,26 @@ export interface KarteMeta {
   pair?: string | null;
   direction?: string | null;
   result?: string | null;
+  emotionPre?: string | null;
   memo?: string | null;
   thumbUrl?: string | null;
+}
+
+/** F1: 自己申告感情とAI判定のズレを示す小バッジ */
+export function GapBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 rounded border border-mixed/50 bg-mixed/10 px-1.5 py-0.5 font-mono text-[10px] font-medium text-mixed">
+      <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3" aria-hidden>
+        <path
+          d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinejoin="round"
+        />
+      </svg>
+      自己認識とズレ
+    </span>
+  );
 }
 
 function MetaCell({ label, value }: { label: string; value: string }) {
@@ -120,6 +138,7 @@ export default function KarteCard({
     meta?.pair && { label: "通貨ペア", value: meta.pair },
     meta?.direction && { label: "方向", value: meta.direction },
     meta?.result && { label: "結果", value: meta.result },
+    meta?.emotionPre && { label: "自己申告", value: meta.emotionPre },
   ].filter(Boolean) as { label: string; value: string }[];
 
   return (
@@ -153,8 +172,11 @@ export default function KarteCard({
             </span>
           </div>
           <div>
-            <p className={`font-mono text-sm font-semibold ${m.text}`}>
+            <p
+              className={`flex flex-wrap items-center gap-2 font-mono text-sm font-semibold ${m.text}`}
+            >
               {m.gloss}
+              {review.emotion_gap && <GapBadge />}
             </p>
             <p className="mt-0.5 text-xs text-muted">{m.description}</p>
           </div>
