@@ -709,6 +709,118 @@ button.tk-pill--active:hover {
 }
 
 /* ============================================================
+   share (判定の共有)
+   ============================================================ */
+.tk-share {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 20px;
+  border: 1px solid var(--tk-rule);
+  background: var(--tk-surface);
+}
+.tk-share__label {
+  font-family: var(--tk-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--tk-text-weak);
+  text-transform: uppercase;
+}
+.tk-share__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.tk-share__btn {
+  font-family: var(--tk-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  padding: 9px 16px;
+  border: 1px solid var(--tk-rule);
+  background: transparent;
+  color: var(--tk-text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.tk-share__btn:hover {
+  border-color: var(--tk-teal);
+  color: var(--tk-teal);
+}
+.tk-share__note {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  color: var(--tk-text-faint);
+  line-height: 1.7;
+}
+
+/* ============================================================
+   legal (規約・プライバシー・特商法)
+   ============================================================ */
+.tk-legal {
+  color: var(--tk-text);
+  line-height: 1.9;
+}
+.tk-legal h1 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-bottom: 16px;
+}
+.tk-legal h2 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--tk-teal);
+  margin: 28px 0 8px;
+}
+.tk-legal p {
+  color: var(--tk-text-weak);
+  font-size: 14px;
+}
+.tk-legal strong {
+  color: var(--tk-text);
+  font-weight: 700;
+}
+.tk-legal__lead {
+  padding-bottom: 8px;
+}
+.tk-legal__note {
+  margin-top: 28px;
+  font-family: var(--tk-font-mono);
+  font-size: 11px;
+  color: var(--tk-text-faint);
+}
+.tk-legal__dl {
+  margin-top: 8px;
+  border-top: 1px solid var(--tk-rule);
+}
+.tk-legal__row {
+  display: flex;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--tk-rule);
+  font-size: 14px;
+}
+.tk-legal__row dt {
+  flex: 0 0 160px;
+  font-family: var(--tk-font-mono);
+  font-size: 12px;
+  color: var(--tk-text-weak);
+}
+.tk-legal__row dd {
+  flex: 1;
+  color: var(--tk-text);
+}
+@media (max-width: 640px) {
+  .tk-legal__row {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .tk-legal__row dt {
+    flex-basis: auto;
+  }
+}
+
+/* ============================================================
    loading (診断中)
    ============================================================ */
 .tk-loading {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import KarteCard from "@/components/KarteCard";
+import ShareButton from "@/components/ShareButton";
 import { deleteKarte } from "@/app/app/actions";
 import {
   formatJst,
@@ -107,6 +108,8 @@ export default async function KarteDetailPage({
             thumbUrl,
           }}
         />
+
+        <ShareButton verdict={review.verdict} pair={row.pair} />
       </div>
     </div>
   );

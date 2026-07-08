@@ -87,6 +87,17 @@ export default function Home() {
           ポジミル
           は過去のトレードの振り返りを支援するツールです。将来の値動きの予測、売買の推奨・助言は一切行いません。投資判断はご自身の責任で行ってください。
         </p>
+        <nav className="mt-4 flex flex-wrap gap-4 font-mono">
+          <Link href="/legal/terms" className="hover:text-accent">
+            利用規約
+          </Link>
+          <Link href="/legal/privacy" className="hover:text-accent">
+            プライバシー
+          </Link>
+          <Link href="/legal/tokushoho" className="hover:text-accent">
+            特定商取引法
+          </Link>
+        </nav>
       </footer>
     </main>
   );

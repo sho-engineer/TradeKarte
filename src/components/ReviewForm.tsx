@@ -14,6 +14,7 @@ import {
   type ReviewResponseBody,
 } from "@/lib/review/types";
 import KarteCard from "./KarteCard";
+import ShareButton from "./ShareButton";
 
 const PAIRS = ["USD/JPY", "EUR/USD", "GBP/JPY", "EUR/JPY", "AUD/JPY", "GBP/USD", "XAU/USD", "その他"];
 const DIRECTIONS = ["ロング", "ショート"];
@@ -396,6 +397,7 @@ export default function ReviewForm() {
                 thumbUrl: previewUrl,
               }}
             />
+            <ShareButton verdict={karte.review.verdict} pair={pair || null} />
             {karte.karteId ? (
               <Link
                 href={`/app/karte/${karte.karteId}`}
