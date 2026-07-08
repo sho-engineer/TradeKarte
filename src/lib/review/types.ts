@@ -2,15 +2,9 @@ export const VERDICTS = ["エッジ", "衝動", "混在"] as const;
 export type Verdict = (typeof VERDICTS)[number];
 
 /** F1: エントリー前の自己申告感情(5つ固定・任意) */
-export const EMOTIONS = [
-  { value: "冷静", emoji: "😌" },
-  { value: "焦り", emoji: "😰" },
-  { value: "取り返したい", emoji: "😤" },
-  { value: "興奮", emoji: "🤩" },
-  { value: "不安", emoji: "😟" },
-] as const;
-export type Emotion = (typeof EMOTIONS)[number]["value"];
-export const EMOTION_VALUES = EMOTIONS.map((e) => e.value) as readonly string[];
+export const EMOTIONS = ["冷静", "焦り", "取り返したい", "興奮", "不安"] as const;
+export type Emotion = (typeof EMOTIONS)[number];
+export const EMOTION_VALUES = EMOTIONS as readonly string[];
 
 export interface Review {
   verdict: Verdict;

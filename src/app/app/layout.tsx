@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AppNav from "@/components/AppNav";
 import Mark from "@/components/brand/Mark";
+import ThemeToggle from "@/components/ThemeToggle";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
 export default async function AppLayout({
@@ -37,6 +38,7 @@ export default async function AppLayout({
             ) : (
               <span>お試しモード · 保存なし</span>
             )}
+            <ThemeToggle />
           </div>
         </div>
       </header>

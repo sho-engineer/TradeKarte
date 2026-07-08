@@ -97,7 +97,7 @@ export default function KarteCard({
             <div className="tk-karte__verdict-label">判定 / VERDICT</div>
             <div className="tk-karte__verdict-headline">{m.headline}</div>
             {review.emotion_gap && (
-              <span className="tk-karte__gap">⚡ 自己認識とズレ</span>
+              <span className="tk-karte__gap">自己認識とズレ</span>
             )}
             <div className="tk-karte__verdict-note">
               判定は損益と独立。エントリー時点で得られた情報のみで評価しています。

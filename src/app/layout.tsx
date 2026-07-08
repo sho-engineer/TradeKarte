@@ -24,6 +24,10 @@ export const metadata: Metadata = {
     "チャート画像と一言メモから、AIが売買の意思決定の質を批評するFXトレーダー向け振り返りツール。売買シグナルは出しません。",
 };
 
+// ペイント前にテーマを確定し、切替時のちらつきを防ぐ。
+// 既定はダーク。保存値 'light' か、保存がなく OS がライト設定なら light を付与。
+const THEME_BOOT = `(function(){try{var e=localStorage.getItem('theme');var m=window.matchMedia('(prefers-color-scheme: light)').matches;if(e==='light'||(e!=='dark'&&m)){document.documentElement.classList.add('light');}}catch(_){}})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,9 +36,13 @@ export default function RootLayout({
   return (
     <html
       lang="ja"
+      suppressHydrationWarning
       className={`${notoSansJp.variable} ${jetbrainsMono.variable} ${manrope.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
+        {children}
+      </body>
     </html>
   );
 }

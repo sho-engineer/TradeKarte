@@ -34,8 +34,13 @@
   --tk-edge-border: #2a4238;
   --tk-impulse: #d98b6a;
   --tk-impulse-border: #4a392e;
+  --tk-impulse-wash: rgba(217, 139, 106, 0.06);
+  --tk-impulse-wash-strong: rgba(217, 139, 106, 0.1);
   --tk-mixed: #9aa3ae;
   --tk-mixed-border: #40454c;
+
+  /* skeleton shimmer の中間色 */
+  --tk-skel-hi: #2b3340;
 
   /* type */
   --tk-font-sans: var(--font-noto-sans-jp), "Noto Sans JP", sans-serif;
@@ -57,6 +62,47 @@
   --edge: var(--tk-edge);
   --impulse: var(--tk-impulse);
   --mixed: var(--tk-mixed);
+}
+
+/* ============================================================
+   ライトテーマ(html.light 指定時)。プリミティブだけ上書きし、
+   エイリアス・@theme・各コンポーネント規則は自動的に追従する。
+   ============================================================ */
+:root.light {
+  color-scheme: light;
+
+  --tk-bg: #f4f6f8;
+  --tk-surface: #ffffff;
+  --tk-surface-alt: #eef1f4;
+  --tk-surface-raised: #e5e9ee;
+
+  --tk-text: #1a1f26;
+  --tk-text-dim: #3a424d;
+  --tk-text-weak: #667080;
+  --tk-text-faint: #97a1ad;
+
+  --tk-rule: #dde2e7;
+  --tk-rule-dim: #eef1f4;
+  --line-strong: #c2cad3;
+
+  /* teal は前景でも読めるよう深める(ブランドは維持) */
+  --tk-teal: #2f7d88;
+  --tk-teal-hi: #3f97a2;
+  --tk-teal-border: #a9d2d8;
+  --tk-teal-wash: rgba(47, 125, 136, 0.06);
+  --tk-teal-wash-strong: rgba(47, 125, 136, 0.16);
+
+  /* 判定機能色も白地で読める彩度に */
+  --tk-edge: #3f8f68;
+  --tk-edge-border: #bfe0cf;
+  --tk-impulse: #b5623c;
+  --tk-impulse-border: #e6cabb;
+  --tk-impulse-wash: rgba(181, 98, 60, 0.06);
+  --tk-impulse-wash-strong: rgba(181, 98, 60, 0.1);
+  --tk-mixed: #6b7580;
+  --tk-mixed-border: #d3d8de;
+
+  --tk-skel-hi: #dfe4ea;
 }
 
 @theme inline {
@@ -195,7 +241,7 @@ body {
   padding: 6px 12px;
 }
 .tk-btn--danger-ghost:hover {
-  background: rgba(217, 139, 106, 0.08);
+  background: var(--tk-impulse-wash-strong);
 }
 .tk-btn--primary {
   font-family: var(--tk-font-sans);
@@ -313,6 +359,24 @@ button.tk-pill--active:hover {
 .tk-topbar__signout:hover {
   color: var(--tk-teal);
   border-bottom-color: var(--tk-teal);
+}
+.tk-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  color: var(--tk-text-weak);
+  background: none;
+  border: 1px solid var(--tk-rule);
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+}
+.tk-theme-toggle:hover {
+  color: var(--tk-teal);
+  border-color: var(--tk-teal);
 }
 @media (max-width: 640px) {
   .tk-topbar__inner {
@@ -607,7 +671,7 @@ button.tk-pill--active:hover {
 .tk-input__error {
   margin: 14px 30px 0;
   border-left: 3px solid var(--tk-impulse);
-  background: rgba(217, 139, 106, 0.06);
+  background: var(--tk-impulse-wash);
   padding: 12px 16px;
   font-size: 13px;
   color: var(--tk-text-dim);
@@ -679,7 +743,7 @@ button.tk-pill--active:hover {
   background: linear-gradient(
     90deg,
     var(--tk-surface-raised) 0%,
-    #2b241f 50%,
+    var(--tk-skel-hi) 50%,
     var(--tk-surface-raised) 100%
   );
   background-size: 200% 100%;

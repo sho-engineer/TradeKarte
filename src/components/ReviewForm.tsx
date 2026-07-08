@@ -274,7 +274,7 @@ export default function ReviewForm() {
             role="group"
             aria-label="エントリー前の感情"
           >
-            {EMOTIONS.map(({ value, emoji }) => {
+            {EMOTIONS.map((value) => {
               const selected = emotion === value;
               return (
                 <button
@@ -284,7 +284,7 @@ export default function ReviewForm() {
                   onClick={() => setEmotion(selected ? "" : value)}
                   className={"tk-pill" + (selected ? " tk-pill--active" : "")}
                 >
-                  <span aria-hidden>{emoji}</span> {value}
+                  {value}
                 </button>
               );
             })}

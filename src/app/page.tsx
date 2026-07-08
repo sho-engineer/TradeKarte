@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Mark from "@/components/brand/Mark";
 import Wordmark from "@/components/brand/Wordmark";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const FEATURES = [
   {
@@ -27,12 +28,15 @@ export default function Home() {
             <Wordmark />
           </span>
         </Link>
-        <Link
-          href="/login"
-          className="border border-line px-4 py-2 text-sm hover:border-accent"
-        >
-          ログイン
-        </Link>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Link
+            href="/login"
+            className="border border-line px-4 py-2 text-sm hover:border-accent"
+          >
+            ログイン
+          </Link>
+        </div>
       </header>
 
       <section className="mt-20 space-y-6">

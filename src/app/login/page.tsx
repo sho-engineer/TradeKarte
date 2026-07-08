@@ -5,6 +5,7 @@ import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Mark from "@/components/brand/Mark";
 import Wordmark from "@/components/brand/Wordmark";
+import ThemeToggle from "@/components/ThemeToggle";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 function LoginForm() {
@@ -82,6 +83,9 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-6 py-16">
+      <div className="absolute right-6 top-6">
+        <ThemeToggle />
+      </div>
       <Link
         href="/"
         className="mb-8 flex items-center justify-center gap-2 font-mono text-lg font-bold text-ink"
