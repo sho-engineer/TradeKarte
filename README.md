@@ -29,8 +29,9 @@ cp .env.example .env.local
 ```
 
 - `ANTHROPIC_API_KEY` … [Anthropic Console](https://console.anthropic.com/) で発行。**これだけ設定すれば、保存なしのお試しモードで動作確認できます。**
-- `MOCK_REVIEW=1` … APIキー無しで固定レビューを返す開発/デモ用モード。UIフローの確認やコスト節約に。
+- `MOCK_REVIEW=1` … APIキー無しで固定レビューを返す開発/デモ用モード。UIフローの確認やコスト節約に。**本番では設定しないこと**(設定すると常に固定レビューになります)。
 - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` … Supabase プロジェクトの Settings → API から。
+- `NEXT_PUBLIC_SITE_URL` … 本番URL(OGP画像・シェアリンクの絶対URL生成に使用)。未設定時は `http://localhost:3000`。本番では必ず設定します。
 
 ### 3. Supabase(認証・保存を使う場合)
 
@@ -51,9 +52,26 @@ npm run dev
 
 ## デプロイ(Vercel)
 
-1. リポジトリを Vercel にインポート
-2. Environment Variables に `.env.local` と同じ値を設定
-3. Supabase の Site URL / Redirect URL に本番ドメインを追加
+Next.js プロジェクトは Vercel がゼロコンフィグで検出します(`vercel.json` 不要)。
+
+1. [vercel.com/new](https://vercel.com/new) でこのリポジトリを import(Framework は Next.js を自動検出)
+2. Production Branch を `main` に(main へマージ済みであること)
+3. Environment Variables を設定:
+
+   | 変数 | 必須 | 備考 |
+   |---|---|---|
+   | `ANTHROPIC_API_KEY` | ✅ | サーバー専用。クライアントに露出させない |
+   | `NEXT_PUBLIC_SUPABASE_URL` | ✅ | Supabase Settings → API |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | 同上 |
+   | `NEXT_PUBLIC_SITE_URL` | ✅ | 本番URL。未設定だと OGP画像URLが localhost になる |
+   | `FREE_MONTHLY_LIMIT` | 任意 | 省略時 5 |
+   | `NEXT_PUBLIC_STRIPE_CHECKOUT_URL` | 任意 | 課金導線を有効化するとき |
+   | `MOCK_REVIEW` | 本番不可 | 設定すると常に固定レビューになる。本番では未設定 |
+
+4. Deploy。初回デプロイ後、払い出された本番URLを `NEXT_PUBLIC_SITE_URL` に設定して再デプロイ(OGP/シェアの絶対URLを確定させる)
+5. Supabase の Authentication → URL Configuration に、本番URLと `<本番URL>/auth/callback` を追加。Storage バケット `karte-thumbs` と migrations(0001/0002)が適用済みであることを確認
+
+> まずは `ANTHROPIC_API_KEY` だけでお試しモードとして動作確認し、その後 Supabase 系の変数を追加する段階投入も可能です。
 
 ## 機能メモ
 
