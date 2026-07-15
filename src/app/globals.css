@@ -1,0 +1,1538 @@
+@import "tailwindcss";
+
+/* ============================================================
+   ポジミル design tokens
+   ブランド面(ロゴ・ヘッダー・ボタン・リンク)は teal 一本。
+   edge/impulse/mix は判定チップ/パターン警告でのみ使う機能色。
+   ============================================================ */
+:root {
+  /* ink — backgrounds */
+  --tk-bg: #0e1116;
+  --tk-surface: #161b22;
+  --tk-surface-alt: #1c232c;
+  --tk-surface-raised: #222a34;
+
+  /* text */
+  --tk-text: #e7eaee;
+  --tk-text-dim: #c7cdd6;
+  --tk-text-weak: #8a93a0;
+  --tk-text-faint: #5c6470;
+
+  /* rules */
+  --tk-rule: #262e38;
+  --tk-rule-dim: #1b212a;
+
+  /* teal — ブランド色(唯一) */
+  --tk-teal: #5ea8b3;
+  --tk-teal-hi: #6fc0cb;
+  --tk-teal-border: #2a4448;
+  --tk-teal-wash: rgba(94, 168, 179, 0.05);
+  --tk-teal-wash-strong: rgba(94, 168, 179, 0.2);
+
+  /* verdict colors(機能色。ブランド装飾には使わない) */
+  --tk-edge: #5fb98c;
+  --tk-edge-border: #2a4238;
+  --tk-impulse: #d98b6a;
+  --tk-impulse-border: #4a392e;
+  --tk-impulse-wash: rgba(217, 139, 106, 0.06);
+  --tk-impulse-wash-strong: rgba(217, 139, 106, 0.1);
+  --tk-mixed: #9aa3ae;
+  --tk-mixed-border: #40454c;
+
+  /* skeleton shimmer の中間色 */
+  --tk-skel-hi: #2b3340;
+
+  /* type */
+  --tk-font-sans: var(--font-noto-sans-jp), "Noto Sans JP", sans-serif;
+  --tk-font-mono: var(--font-jetbrains-mono), "JetBrains Mono", monospace;
+  --tk-font-wordmark: var(--font-manrope), "Manrope", sans-serif;
+
+  /* --- 旧トークン名のエイリアス(ランディング/ログイン/プラン等が参照) --- */
+  --bg: var(--tk-bg);
+  --bg-2: var(--tk-surface);
+  --panel: var(--tk-surface);
+  --panel-2: var(--tk-surface-alt);
+  --panel-3: var(--tk-surface-raised);
+  --ink: var(--tk-text);
+  --muted: var(--tk-text-weak);
+  --line: var(--tk-rule);
+  --line-strong: #33414d;
+  --accent: var(--tk-teal);
+  --accent-dim: var(--tk-teal-border);
+  --edge: var(--tk-edge);
+  --impulse: var(--tk-impulse);
+  --mixed: var(--tk-mixed);
+}
+
+/* ============================================================
+   ライトテーマ(html.light 指定時)。プリミティブだけ上書きし、
+   エイリアス・@theme・各コンポーネント規則は自動的に追従する。
+   ============================================================ */
+:root.light {
+  color-scheme: light;
+
+  --tk-bg: #f4f6f8;
+  --tk-surface: #ffffff;
+  --tk-surface-alt: #eef1f4;
+  --tk-surface-raised: #e5e9ee;
+
+  --tk-text: #1a1f26;
+  --tk-text-dim: #3a424d;
+  --tk-text-weak: #667080;
+  --tk-text-faint: #97a1ad;
+
+  --tk-rule: #dde2e7;
+  --tk-rule-dim: #eef1f4;
+  --line-strong: #c2cad3;
+
+  /* teal は前景でも読めるよう深める(ブランドは維持) */
+  --tk-teal: #2f7d88;
+  --tk-teal-hi: #3f97a2;
+  --tk-teal-border: #a9d2d8;
+  --tk-teal-wash: rgba(47, 125, 136, 0.06);
+  --tk-teal-wash-strong: rgba(47, 125, 136, 0.16);
+
+  /* 判定機能色も白地で読める彩度に */
+  --tk-edge: #3f8f68;
+  --tk-edge-border: #bfe0cf;
+  --tk-impulse: #b5623c;
+  --tk-impulse-border: #e6cabb;
+  --tk-impulse-wash: rgba(181, 98, 60, 0.06);
+  --tk-impulse-wash-strong: rgba(181, 98, 60, 0.1);
+  --tk-mixed: #6b7580;
+  --tk-mixed-border: #d3d8de;
+
+  --tk-skel-hi: #dfe4ea;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-2: var(--bg-2);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-panel-3: var(--panel-3);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-dim: var(--accent-dim);
+  --color-edge: var(--edge);
+  --color-impulse: var(--impulse);
+  --color-mixed: var(--mixed);
+  --font-sans: var(--tk-font-sans);
+  --font-mono: var(--tk-font-mono);
+  --font-wordmark: var(--tk-font-wordmark);
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--tk-bg);
+  color: var(--tk-text);
+  font-family: var(--tk-font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--tk-teal-wash-strong);
+  color: var(--tk-text);
+}
+
+:focus-visible {
+  outline: 2px solid var(--tk-teal);
+  outline-offset: 2px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--tk-rule) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--tk-rule);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+@keyframes tk-ink {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes tk-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* !important: these utility classes must win over a component's own
+   `display` rule regardless of CSS bundle order. */
+.tk-only-mobile,
+.tk-only-mobile-inline {
+  display: none !important;
+}
+@media (max-width: 640px) {
+  .tk-only-desktop,
+  .tk-only-desktop-inline {
+    display: none !important;
+  }
+  .tk-only-mobile {
+    display: block !important;
+  }
+  .tk-only-mobile-inline {
+    display: inline !important;
+  }
+}
+
+/* ============================================================
+   shared
+   ============================================================ */
+.tk-card {
+  background: var(--tk-surface);
+  border: 1px solid var(--tk-rule);
+}
+
+.tk-btn {
+  font-family: var(--tk-font-mono);
+  cursor: pointer;
+}
+.tk-btn--ghost {
+  font-size: 11px;
+  color: var(--tk-text-dim);
+  background: none;
+  border: 1px solid var(--tk-rule);
+  padding: 6px 12px;
+}
+.tk-btn--ghost:hover {
+  color: var(--tk-text);
+  border-color: var(--tk-text-weak);
+}
+.tk-btn--danger-ghost {
+  font-size: 11px;
+  color: var(--tk-impulse);
+  background: none;
+  border: 1px solid var(--tk-impulse-border);
+  padding: 6px 12px;
+}
+.tk-btn--danger-ghost:hover {
+  background: var(--tk-impulse-wash-strong);
+}
+.tk-btn--primary {
+  font-family: var(--tk-font-sans);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.14em;
+  color: var(--tk-bg);
+  background: var(--tk-teal);
+  border: none;
+  padding: 14px 34px;
+}
+.tk-btn--primary:hover {
+  opacity: 0.92;
+}
+.tk-btn--primary:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.tk-pill {
+  display: inline-block;
+  font-family: var(--tk-font-mono);
+  font-size: 11px;
+  color: var(--tk-text-weak);
+  border: 1px solid var(--tk-rule);
+  padding: 3px 10px;
+  background: none;
+}
+button.tk-pill {
+  cursor: pointer;
+}
+button.tk-pill:hover {
+  color: var(--tk-text);
+  border-color: var(--tk-text-weak);
+}
+.tk-pill--active,
+button.tk-pill--active:hover {
+  color: var(--tk-bg);
+  background: var(--tk-teal);
+  border-color: var(--tk-teal);
+}
+
+/* ============================================================
+   topbar
+   ============================================================ */
+.tk-topbar {
+  border-bottom: 1px solid var(--tk-rule);
+}
+.tk-topbar__inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 20px 40px 12px;
+}
+.tk-topbar__brand {
+  font-family: var(--tk-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.26em;
+  color: var(--tk-text-weak);
+  text-decoration: none;
+}
+.tk-topbar__brand:hover {
+  color: var(--tk-text);
+}
+.tk-topbar__brand--mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.2em;
+}
+.tk-topbar__nav {
+  display: flex;
+  gap: 18px;
+  align-items: baseline;
+}
+.tk-topbar__link {
+  font-family: var(--tk-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--tk-text-weak);
+  text-decoration: none;
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+}
+.tk-topbar__link:hover {
+  color: var(--tk-text);
+}
+.tk-topbar__link--active {
+  color: var(--tk-teal);
+  border-bottom-color: var(--tk-teal);
+}
+.tk-topbar__meta {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--tk-text-faint);
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+}
+.tk-topbar__signout {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  color: var(--tk-text-weak);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--tk-rule);
+  padding: 0 0 1px;
+  cursor: pointer;
+}
+.tk-topbar__signout:hover {
+  color: var(--tk-teal);
+  border-bottom-color: var(--tk-teal);
+}
+.tk-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  color: var(--tk-text-weak);
+  background: none;
+  border: 1px solid var(--tk-rule);
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+}
+.tk-theme-toggle:hover {
+  color: var(--tk-teal);
+  border-color: var(--tk-teal);
+}
+@media (max-width: 640px) {
+  .tk-topbar__inner {
+    padding: 16px 18px 10px;
+  }
+  .tk-topbar__nav {
+    gap: 12px;
+  }
+}
+
+/* ============================================================
+   page frame
+   ============================================================ */
+.tk-page {
+  padding: 40px 40px 64px;
+  display: flex;
+  justify-content: center;
+}
+.tk-page__col {
+  width: 100%;
+  max-width: 760px;
+}
+.tk-page__col--wide {
+  max-width: 900px;
+}
+@media (max-width: 640px) {
+  .tk-page {
+    padding: 24px 12px 48px;
+  }
+}
+
+/* ============================================================
+   input (新規カルテ受付)
+   ============================================================ */
+.tk-input__masthead {
+  padding: 26px 30px 18px;
+  border-bottom: 2px solid var(--tk-teal);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.tk-input__title {
+  font-family: var(--tk-font-sans);
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+.tk-input__subtitle {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: var(--tk-text-weak);
+  margin-top: 6px;
+}
+.tk-input__no {
+  font-family: var(--tk-font-mono);
+  font-size: 11px;
+  color: var(--tk-text-weak);
+  letter-spacing: 0.14em;
+}
+
+.tk-input__block {
+  padding: 18px 30px 8px;
+}
+.tk-input__label {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--tk-text-weak);
+  margin-bottom: 12px;
+}
+.tk-input__label--accent {
+  font-size: 11px;
+  color: var(--tk-teal);
+}
+.tk-input__label-note {
+  color: var(--tk-text-faint);
+  letter-spacing: 0.08em;
+}
+
+/* dropzone */
+.tk-input__dropzone {
+  border: 1px solid var(--tk-rule);
+  background: var(--tk-surface-alt);
+}
+.tk-input__dropzone--empty {
+  cursor: pointer;
+  padding: 30px 18px;
+  text-align: center;
+}
+.tk-input__dropzone--drag {
+  border-color: var(--tk-teal);
+  background: var(--tk-teal-wash);
+}
+.tk-input__dropzone-cta {
+  font-family: var(--tk-font-sans);
+  font-size: 14px;
+  color: var(--tk-text-dim);
+  letter-spacing: 0.06em;
+}
+.tk-input__dropzone-sub {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  color: var(--tk-text-faint);
+  letter-spacing: 0.12em;
+  margin-top: 8px;
+}
+.tk-input__dropzone-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--tk-rule);
+}
+.tk-input__dropzone-note {
+  padding: 10px 18px;
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  color: var(--tk-text-faint);
+  letter-spacing: 0.08em;
+}
+.tk-input__dropzone-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.tk-input__thumb {
+  width: 88px;
+  height: 58px;
+  object-fit: cover;
+  background: var(--tk-surface-raised);
+  border: 1px solid var(--tk-rule);
+  flex-shrink: 0;
+}
+.tk-input__file-info {
+  flex: 1;
+  min-width: 0;
+}
+.tk-input__filename {
+  font-family: var(--tk-font-mono);
+  font-size: 13px;
+  color: var(--tk-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tk-input__filemeta {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  color: var(--tk-text-weak);
+  margin-top: 4px;
+  letter-spacing: 0.1em;
+}
+
+/* memo */
+.tk-input__memo-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+.tk-input__memo-head .tk-input__label {
+  margin-bottom: 0;
+}
+.tk-input__counter {
+  font-family: var(--tk-font-mono);
+  font-size: 11px;
+  color: var(--tk-text-weak);
+}
+.tk-textarea {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--tk-rule);
+  background: var(--tk-surface-alt);
+  padding: 14px 16px;
+  min-height: 84px;
+  font-family: var(--tk-font-sans);
+  font-size: 14px;
+  color: var(--tk-text-dim);
+  line-height: 1.8;
+  resize: vertical;
+}
+.tk-textarea::placeholder {
+  color: var(--tk-text-faint);
+}
+.tk-textarea:focus {
+  outline: none;
+  border-color: var(--tk-teal);
+}
+
+/* emotion pills (F1) */
+.tk-input__pillrow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* optional fields grid */
+.tk-input__optgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  border: 1px solid var(--tk-rule);
+}
+.tk-input__optcell {
+  padding: 12px 16px;
+  border-right: 1px solid var(--tk-rule);
+  min-width: 0;
+}
+.tk-input__optcell:last-child {
+  border-right: none;
+}
+.tk-input__optlabel {
+  font-family: var(--tk-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--tk-text-weak);
+}
+.tk-input__optcell .tk-input__pillrow {
+  margin-top: 9px;
+}
+.tk-select {
+  appearance: none;
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: var(--tk-font-sans);
+  font-size: 15px;
+  color: var(--tk-text);
+  margin-top: 6px;
+  padding: 0 14px 0 0;
+  cursor: pointer;
+}
+.tk-select option {
+  background: var(--tk-surface);
+  font-family: var(--tk-font-sans);
+}
+.tk-select-wrap {
+  position: relative;
+}
+.tk-select-wrap::after {
+  content: "▾";
+  position: absolute;
+  right: 0;
+  top: 55%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--tk-text-weak);
+  pointer-events: none;
+}
+@media (max-width: 640px) {
+  .tk-input__masthead {
+    padding: 16px 18px;
+    align-items: center;
+  }
+  .tk-input__title {
+    font-size: 18px;
+    letter-spacing: 0.08em;
+  }
+  .tk-input__no {
+    font-size: 9px;
+  }
+  .tk-input__block {
+    padding: 14px 18px 8px;
+  }
+  .tk-input__optgrid {
+    grid-template-columns: 1fr;
+  }
+  .tk-input__optcell {
+    border-right: none;
+    border-bottom: 1px solid var(--tk-rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 14px;
+  }
+  .tk-input__optcell:last-child {
+    border-bottom: none;
+  }
+  .tk-input__optcell .tk-input__pillrow,
+  .tk-select {
+    margin-top: 0;
+  }
+  .tk-select {
+    width: auto;
+    text-align: right;
+    font-size: 14px;
+  }
+}
+
+/* error + submit */
+.tk-input__error {
+  margin: 14px 30px 0;
+  border-left: 3px solid var(--tk-impulse);
+  background: var(--tk-impulse-wash);
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--tk-text-dim);
+}
+.tk-input__submit {
+  padding: 22px 30px 28px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.tk-input__submit-note {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  color: var(--tk-text-faint);
+  line-height: 1.7;
+}
+@media (max-width: 640px) {
+  .tk-input__error {
+    margin: 12px 18px 0;
+  }
+  .tk-input__submit {
+    padding: 16px 18px 20px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .tk-input__submit .tk-btn--primary {
+    width: 100%;
+    padding: 15px 0;
+    font-size: 15px;
+  }
+  .tk-input__submit-note {
+    text-align: center;
+  }
+}
+
+/* ============================================================
+   share (判定の共有)
+   ============================================================ */
+.tk-share {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 20px;
+  border: 1px solid var(--tk-rule);
+  background: var(--tk-surface);
+}
+.tk-share__label {
+  font-family: var(--tk-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--tk-text-weak);
+  text-transform: uppercase;
+}
+.tk-share__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.tk-share__btn {
+  font-family: var(--tk-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  padding: 9px 16px;
+  border: 1px solid var(--tk-rule);
+  background: transparent;
+  color: var(--tk-text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.tk-share__btn:hover {
+  border-color: var(--tk-teal);
+  color: var(--tk-teal);
+}
+.tk-share__note {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  color: var(--tk-text-faint);
+  line-height: 1.7;
+}
+
+/* ============================================================
+   legal (規約・プライバシー・特商法)
+   ============================================================ */
+.tk-legal {
+  color: var(--tk-text);
+  line-height: 1.9;
+}
+.tk-legal h1 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-bottom: 16px;
+}
+.tk-legal h2 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--tk-teal);
+  margin: 28px 0 8px;
+}
+.tk-legal p {
+  color: var(--tk-text-weak);
+  font-size: 14px;
+}
+.tk-legal strong {
+  color: var(--tk-text);
+  font-weight: 700;
+}
+.tk-legal__lead {
+  padding-bottom: 8px;
+}
+.tk-legal__note {
+  margin-top: 28px;
+  font-family: var(--tk-font-mono);
+  font-size: 11px;
+  color: var(--tk-text-faint);
+}
+.tk-legal__dl {
+  margin-top: 8px;
+  border-top: 1px solid var(--tk-rule);
+}
+.tk-legal__row {
+  display: flex;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--tk-rule);
+  font-size: 14px;
+}
+.tk-legal__row dt {
+  flex: 0 0 160px;
+  font-family: var(--tk-font-mono);
+  font-size: 12px;
+  color: var(--tk-text-weak);
+}
+.tk-legal__row dd {
+  flex: 1;
+  color: var(--tk-text);
+}
+@media (max-width: 640px) {
+  .tk-legal__row {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .tk-legal__row dt {
+    flex-basis: auto;
+  }
+}
+
+/* ============================================================
+   loading (診断中)
+   ============================================================ */
+.tk-loading {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+.tk-loading__head {
+  padding: 24px 26px 16px;
+  border-bottom: 2px solid var(--tk-rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.tk-loading__title {
+  font-family: var(--tk-font-sans);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+.tk-loading__status {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  color: var(--tk-mixed);
+  letter-spacing: 0.16em;
+  animation: tk-pulse 1.4s ease-in-out infinite;
+}
+.tk-loading__body {
+  padding: 20px 26px;
+}
+.tk-skel {
+  background: linear-gradient(
+    90deg,
+    var(--tk-surface-raised) 0%,
+    var(--tk-skel-hi) 50%,
+    var(--tk-surface-raised) 100%
+  );
+  background-size: 200% 100%;
+  animation: tk-pulse 1.6s ease-in-out infinite;
+}
+.tk-loading__chart-skel {
+  height: 150px;
+  margin-bottom: 18px;
+  border: 1px solid var(--tk-rule);
+}
+.tk-loading__verdict-skel {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.tk-loading__stamp-skel {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.tk-loading__verdict-lines {
+  flex: 1;
+}
+.tk-loading__sections {
+  border-top: 1px solid var(--tk-rule);
+  padding-top: 16px;
+}
+.tk-loading__section-row {
+  margin-bottom: 16px;
+}
+.tk-loading__section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.tk-loading__section-n {
+  font-family: var(--tk-font-mono);
+  color: var(--tk-text-weak);
+  font-size: 12px;
+}
+.tk-loading__ink-rule {
+  height: 1px;
+  flex: 1;
+  background: var(--tk-rule);
+  transform-origin: left;
+  animation: tk-ink 0.8s ease-out both;
+}
+.tk-loading__footer {
+  padding: 14px 26px 22px;
+  border-top: 1px solid var(--tk-rule);
+  text-align: center;
+}
+.tk-loading__footer-line {
+  font-family: var(--tk-font-sans);
+  font-size: 14px;
+  color: var(--tk-text-dim);
+  letter-spacing: 0.06em;
+}
+.tk-loading__footer-sub {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  color: var(--tk-text-faint);
+  margin-top: 8px;
+  letter-spacing: 0.1em;
+}
+
+/* ============================================================
+   verdict stamp (判定印)
+   ============================================================ */
+.tk-stamp {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-style: solid;
+  border-radius: 50%;
+  font-family: var(--tk-font-sans);
+  font-weight: 800;
+  white-space: nowrap;
+}
+.tk-stamp__mark {
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.tk-stamp__label {
+  font-family: var(--tk-font-mono);
+  font-weight: 400;
+}
+.tk-stamp--hero {
+  width: 112px;
+  height: 112px;
+  border-width: 2.5px;
+  transform: rotate(-8deg);
+}
+.tk-stamp--hero .tk-stamp__mark {
+  font-size: 34px;
+}
+.tk-stamp--hero .tk-stamp__label {
+  font-size: 8px;
+  letter-spacing: 0.24em;
+  margin-top: 7px;
+}
+.tk-stamp--sm {
+  width: 38px;
+  height: 38px;
+  border-width: 1.5px;
+  transform: rotate(-6deg);
+}
+.tk-stamp--sm .tk-stamp__mark {
+  font-size: 12px;
+}
+@media (max-width: 640px) {
+  .tk-stamp--hero {
+    width: 78px;
+    height: 78px;
+    border-width: 2px;
+  }
+  .tk-stamp--hero .tk-stamp__mark {
+    font-size: 24px;
+  }
+  .tk-stamp--hero .tk-stamp__label {
+    font-size: 7px;
+    letter-spacing: 0.2em;
+    margin-top: 5px;
+  }
+  .tk-stamp--sm {
+    width: 34px;
+    height: 34px;
+  }
+  .tk-stamp--sm .tk-stamp__mark {
+    font-size: 10px;
+  }
+}
+
+/* ============================================================
+   karte (診断カルテ)
+   ============================================================ */
+.tk-karte__ledger {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px solid var(--tk-rule);
+  padding-bottom: 12px;
+  font-family: var(--tk-font-mono);
+  font-size: 11px;
+  color: var(--tk-text-weak);
+}
+.tk-karte__ledger span:first-child {
+  letter-spacing: 0.26em;
+}
+.tk-karte__ledger span:last-child {
+  letter-spacing: 0.16em;
+}
+.tk-karte__card {
+  background: var(--tk-surface);
+  border: 1px solid var(--tk-rule);
+}
+.tk-karte__ledger + .tk-karte__card {
+  border-top: none;
+}
+
+.tk-karte__masthead {
+  padding: 30px 34px 20px;
+  border-bottom: 2px solid var(--tk-teal);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.tk-karte__title {
+  font-family: var(--tk-font-sans);
+  color: var(--tk-text);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+.tk-karte__subtitle {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: var(--tk-text-weak);
+  margin-top: 7px;
+}
+.tk-karte__timestamp {
+  text-align: right;
+  font-family: var(--tk-font-mono);
+  color: var(--tk-text-weak);
+  font-size: 11px;
+  line-height: 1.9;
+  letter-spacing: 0.12em;
+}
+
+.tk-karte__specimen {
+  border-bottom: 1px solid var(--tk-rule);
+}
+.tk-karte__specimen-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 16px 34px 12px;
+}
+.tk-karte__specimen-label {
+  font-family: var(--tk-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--tk-teal);
+}
+.tk-karte__specimen-meta {
+  font-family: var(--tk-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--tk-text-weak);
+}
+.tk-karte__chart {
+  display: block;
+  width: calc(100% - 68px);
+  margin: 0 34px 22px;
+  border: 1px solid var(--tk-rule);
+}
+.tk-karte__memo {
+  margin: 0 34px 22px;
+  border-left: 2px solid var(--tk-rule);
+  padding: 4px 0 4px 16px;
+}
+.tk-karte__memo-label {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--tk-text-weak);
+  margin-bottom: 6px;
+}
+.tk-karte__memo-text {
+  font-family: var(--tk-font-sans);
+  color: var(--tk-text-dim);
+  font-size: 14px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+.tk-karte__verdict {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 30px 34px;
+  border-bottom: 1px solid var(--tk-rule);
+}
+.tk-karte__verdict-label {
+  font-family: var(--tk-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  color: var(--tk-text-weak);
+}
+.tk-karte__verdict-headline {
+  font-family: var(--tk-font-sans);
+  color: var(--tk-text);
+  font-size: 22px;
+  font-weight: 700;
+  margin-top: 11px;
+  line-height: 1.55;
+}
+.tk-karte__gap {
+  display: inline-block;
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--tk-mixed);
+  border: 1px solid var(--tk-mixed-border);
+  padding: 3px 9px;
+  margin-top: 10px;
+}
+.tk-karte__verdict-note {
+  color: var(--tk-text-weak);
+  font-size: 11.5px;
+  line-height: 1.7;
+  margin-top: 12px;
+  border-top: 1px dotted var(--tk-rule);
+  padding-top: 10px;
+}
+
+.tk-karte__meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  border-bottom: 1px solid var(--tk-rule);
+}
+.tk-karte__meta-cell {
+  padding: 14px 20px;
+  border-right: 1px solid var(--tk-rule);
+}
+.tk-karte__meta-cell:last-child {
+  border-right: none;
+}
+.tk-karte__meta-label {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--tk-text-weak);
+}
+.tk-karte__meta-value {
+  font-family: var(--tk-font-sans);
+  color: var(--tk-text);
+  font-size: 16px;
+  margin-top: 6px;
+}
+.tk-karte__meta-value--dim {
+  color: var(--tk-text-weak);
+}
+.tk-karte__meta-note {
+  font-size: 10px;
+  font-family: var(--tk-font-mono);
+}
+
+.tk-karte__section {
+  padding: 20px 34px 6px;
+}
+.tk-karte__section--first {
+  padding-top: 24px;
+}
+.tk-karte__section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.tk-karte__section-n {
+  font-family: var(--tk-font-mono);
+  font-size: 13px;
+  font-weight: 700;
+}
+.tk-karte__section-title {
+  font-family: var(--tk-font-sans);
+  color: var(--tk-text);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.tk-karte__section-tag {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  color: var(--tk-text-weak);
+  letter-spacing: 0.12em;
+}
+.tk-karte__section-rule {
+  flex: 1;
+  border-bottom: 1px dotted var(--tk-rule);
+  transform: translateY(-3px);
+}
+.tk-karte__section-body {
+  color: var(--tk-text-dim);
+  font-size: 14px;
+  line-height: 2;
+  margin-top: 12px;
+  padding-left: 32px;
+}
+.tk-karte__disclaimer {
+  color: var(--tk-text-faint);
+}
+
+.tk-karte__tags {
+  padding: 22px 34px 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.tk-karte__tag {
+  font-family: var(--tk-font-mono);
+  font-size: 11px;
+  color: var(--tk-text-dim);
+  border: 1px solid var(--tk-rule);
+  padding: 4px 10px;
+}
+
+.tk-karte__pattern {
+  margin: 22px 34px 30px;
+  border-left: 3px solid var(--tk-impulse);
+  background: var(--tk-surface-raised);
+  padding: 14px 18px;
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+}
+.tk-karte__pattern-label {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--tk-impulse);
+  flex-shrink: 0;
+}
+.tk-karte__pattern-name {
+  display: block;
+  font-family: var(--tk-font-sans);
+  color: var(--tk-impulse);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.8;
+}
+.tk-karte__tags:last-child {
+  padding-bottom: 30px;
+}
+
+@media (max-width: 640px) {
+  .tk-karte__ledger {
+    display: none;
+  }
+  .tk-karte__ledger + .tk-karte__card {
+    border-top: 1px solid var(--tk-rule);
+  }
+  .tk-karte__masthead {
+    padding: 16px 18px;
+    align-items: center;
+  }
+  .tk-karte__title {
+    font-size: 18px;
+    letter-spacing: 0.1em;
+  }
+  .tk-karte__timestamp {
+    font-size: 9px;
+  }
+  .tk-karte__specimen-head {
+    padding: 14px 18px 8px;
+  }
+  .tk-karte__specimen-label,
+  .tk-karte__specimen-meta {
+    font-size: 9px;
+    letter-spacing: 0.16em;
+  }
+  .tk-karte__chart {
+    width: calc(100% - 36px);
+    margin: 0 18px 14px;
+  }
+  .tk-karte__memo {
+    margin: 0 18px 16px;
+    padding-left: 12px;
+  }
+  .tk-karte__memo-text {
+    font-size: 13px;
+  }
+  .tk-karte__verdict {
+    gap: 16px;
+    padding: 16px 18px;
+  }
+  .tk-karte__verdict-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+  }
+  .tk-karte__verdict-headline {
+    font-size: 16px;
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+  .tk-karte__verdict-note {
+    font-size: 10px;
+  }
+  .tk-karte__meta-cell {
+    padding: 10px 12px;
+  }
+  .tk-karte__meta-label {
+    font-size: 8px;
+    letter-spacing: 0.14em;
+  }
+  .tk-karte__meta-value {
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  .tk-karte__section {
+    padding: 12px 18px 4px;
+  }
+  .tk-karte__section--first {
+    padding-top: 16px;
+  }
+  .tk-karte__section-head {
+    gap: 8px;
+  }
+  .tk-karte__section-n {
+    font-size: 12px;
+  }
+  .tk-karte__section-title {
+    font-size: 14px;
+  }
+  .tk-karte__section-body {
+    font-size: 12.5px;
+    line-height: 1.9;
+    margin-top: 8px;
+    padding-left: 0;
+  }
+  .tk-karte__tags {
+    padding: 14px 18px 0;
+    gap: 6px;
+  }
+  .tk-karte__tags:last-child {
+    padding-bottom: 18px;
+  }
+  .tk-karte__tag {
+    font-size: 10px;
+    padding: 3px 9px;
+  }
+  .tk-karte__pattern {
+    margin: 14px 18px 18px;
+    padding: 11px 14px;
+    display: block;
+  }
+  .tk-karte__pattern-name {
+    font-size: 12px;
+  }
+}
+
+/* ============================================================
+   history (カルテ台帳)
+   ============================================================ */
+.tk-history__head {
+  padding: 22px 30px 16px;
+  border-bottom: 2px solid var(--tk-teal);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+}
+.tk-history__title {
+  font-family: var(--tk-font-sans);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+.tk-history__subtitle {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: var(--tk-text-weak);
+  margin-top: 6px;
+}
+.tk-history__filters {
+  display: flex;
+  gap: 8px;
+}
+.tk-history__filter {
+  font-family: var(--tk-font-mono);
+  font-size: 11px;
+  border: 1px solid var(--tk-rule);
+  padding: 5px 12px;
+  white-space: nowrap;
+  color: var(--tk-text-weak);
+  text-decoration: none;
+}
+.tk-history__filter:hover {
+  color: var(--tk-text);
+}
+.tk-history__filter--active {
+  color: var(--tk-surface);
+  background: var(--tk-text);
+  border-color: var(--tk-text);
+}
+.tk-history__filters-mobile {
+  display: flex;
+  gap: 6px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--tk-rule);
+  overflow-x: auto;
+}
+
+.tk-history__colhead {
+  display: grid;
+  grid-template-columns: 56px 120px 132px 1fr 120px;
+  padding: 10px 30px;
+  border-bottom: 1px solid var(--tk-rule);
+  font-family: var(--tk-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--tk-text-faint);
+}
+.tk-history__colhead-tag {
+  text-align: right;
+}
+.tk-history__row {
+  display: grid;
+  grid-template-columns: 56px 120px 132px 1fr 120px;
+  align-items: center;
+  padding: 16px 30px;
+  border-bottom: 1px solid var(--tk-rule-dim);
+  text-decoration: none;
+}
+.tk-history__row:hover {
+  background: var(--tk-surface-alt);
+}
+.tk-history__id {
+  font-family: var(--tk-font-mono);
+  font-size: 12px;
+  color: var(--tk-text-weak);
+  letter-spacing: 0.08em;
+}
+.tk-history__date {
+  font-family: var(--tk-font-mono);
+  font-size: 12px;
+  color: var(--tk-text-weak);
+}
+.tk-history__summary {
+  font-family: var(--tk-font-sans);
+  font-size: 14px;
+  color: var(--tk-text-dim);
+  line-height: 1.6;
+  padding-right: 20px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.tk-history__tag {
+  font-family: var(--tk-font-mono);
+  font-size: 10px;
+  color: var(--tk-text-weak);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tk-history__row-mobile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--tk-rule-dim);
+  text-decoration: none;
+}
+.tk-history__row-mobile-body {
+  flex: 1;
+  min-width: 0;
+}
+.tk-history__row-mobile-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.tk-history__summary-mobile {
+  font-family: var(--tk-font-sans);
+  font-size: 13px;
+  color: var(--tk-text-dim);
+  line-height: 1.55;
+  margin-top: 4px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.tk-history__empty {
+  padding: 40px 30px;
+  text-align: center;
+  font-family: var(--tk-font-sans);
+  font-size: 14px;
+  color: var(--tk-text-weak);
+}
+.tk-history__empty a {
+  color: var(--tk-teal);
+}
+
+@media (max-width: 640px) {
+  .tk-history__head {
+    padding: 16px 18px;
+    align-items: center;
+  }
+  .tk-history__title {
+    font-size: 18px;
+    letter-spacing: 0.08em;
+  }
+  .tk-history__filter {
+    font-size: 10px;
+    padding: 4px 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
