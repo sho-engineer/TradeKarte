@@ -5,16 +5,16 @@ import ThemeToggle from "@/components/ThemeToggle";
 
 const FEATURES = [
   {
-    title: "判定は損益と独立",
-    body: "勝ち負けではなく、エントリー時点で見えていた情報だけで「エッジ／衝動／混在」を判定。勝ったのに衝動、負けたのにエッジ、が正しく可視化されます。",
+    title: "AIは、結果を知らない",
+    body: "チャートはエントリー地点でクロップしてから送信。損益・決済結果・エントリー後の値動きはAIに一切渡りません。勝ったのに、怒られることがあります。",
   },
   {
-    title: "コーチと批判者の2視点",
-    body: "根拠の妥当性を認める「所見」と、バイアスや見落としを突く「指摘」。耳が痛い部分まで含めて1枚のカルテに。",
+    title: "自分のルールと照合",
+    body: "事前に登録したプレイブック（必須条件・見送り条件・無効化基準）と、実際の行動が沿っていたかを1条件ずつ監査します。",
   },
   {
-    title: "繰り返す癖を検出",
-    body: "カルテはタグ付きで蓄積。同じ失敗パターン（FOMO・リベンジ等）が直近30日で繰り返されると警告します。",
+    title: "事実と推測を分ける",
+    body: "画像や文章から確認できた事実と、そこから推測される行動兆候を分けて提示。根拠の出所も明記します。判定はあなたが訂正できます。",
   },
 ];
 
@@ -31,10 +31,10 @@ export default function Home() {
         <div className="flex items-center gap-3">
           <ThemeToggle />
           <Link
-            href="/login"
+            href="/app"
             className="border border-line px-4 py-2 text-sm hover:border-accent"
           >
-            ログイン
+            はじめる
           </Link>
         </div>
       </header>
@@ -49,23 +49,16 @@ export default function Home() {
           <span className="text-accent">エッジ</span>か
           <span className="text-impulse">衝動</span>か。
         </h1>
+        <p className="font-semibold text-ink">AIは、結果を知らない。</p>
         <p className="max-w-xl leading-relaxed text-muted">
-          チャート画像と一言メモを投げるだけ。AIがあなたの売買の
-          「意思決定の質」を批評し、カルテとして記録します。
-          集計アプリでも、シグナル配信でもありません。
+          AIが見るのは、エントリー地点までのチャートと、あなたが事前に決めたルール、そしてエントリー理由だけ。結果を知らないAIが「判断の質」を監査します。売買シグナルも、将来予測も出しません。
         </p>
         <div className="flex gap-3">
           <Link
-            href="/login"
+            href="/app"
             className="bg-accent px-6 py-3 font-semibold text-bg hover:opacity-90"
           >
-            無料で始める
-          </Link>
-          <Link
-            href="/app"
-            className="border border-line px-6 py-3 text-sm leading-6 hover:border-accent"
-          >
-            まず試す
+            はじめる
           </Link>
         </div>
       </section>
@@ -87,17 +80,6 @@ export default function Home() {
           ポジミル
           は過去のトレードの振り返りを支援するツールです。将来の値動きの予測、売買の推奨・助言は一切行いません。投資判断はご自身の責任で行ってください。
         </p>
-        <nav className="mt-4 flex flex-wrap gap-4 font-mono">
-          <Link href="/legal/terms" className="hover:text-accent">
-            利用規約
-          </Link>
-          <Link href="/legal/privacy" className="hover:text-accent">
-            プライバシー
-          </Link>
-          <Link href="/legal/tokushoho" className="hover:text-accent">
-            特定商取引法
-          </Link>
-        </nav>
       </footer>
     </main>
   );
