@@ -1,88 +1,68 @@
-# ポジミル (pojimiru)
+# ポジミル (pojimiru) — Phase 0A
 
-日本語の個人裁量FXトレーダー向け、AIトレード振り返りWebアプリ(Phase 1 MVP)。
-「そのポジは、エッジか衝動か。」
+日本語の個人裁量FXトレーダー向け「判断監査」Webアプリ。
 
-チャート画像+一言メモを投げると、AIが「その売買の意思決定の質」を批評してカルテとして返します。数字の集計ではなく判断の質を診ます。**将来の売買シグナル・推奨は一切出しません**(過去の振り返り支援のみ)。
+> そのエントリー、ルール通り？
+> 結果を知る前の判断だけを、あなたのプレイブックに照らして監査します。
+
+チャート画像(エントリー時点まで)+エントリー理由を、**あなた自身のルール(プレイブック)**に照らしてAIが監査し、6分類(ルール適合/根拠不足/ルール逸脱/衝動兆候/混在/判定不能)のカルテを返します。結果(勝敗・損益)はAIに一切渡しません。将来の売買シグナル・推奨は出しません。
+
+仕様の正本: `docs/ポジミル_機能設計書_v3.3.md` / `docs/ポジミル_Phase0_必須テスト.md` / `docs/ポジミル_ClaudeCode_着手プロンプト_v3.md`
 
 ## 技術スタック
 
-- Next.js (App Router) / TypeScript / Tailwind CSS
-- Anthropic Claude API (`claude-sonnet-4-6`、画像入力+構造化JSON出力)
-- Supabase (Postgres + Auth + Storage)
-- Vercel (ホスティング) / Stripe (課金導線スタブ)
+- Next.js (App Router) / TypeScript / Tailwind CSS v4
+- Anthropic API(モデルは `ANTHROPIC_MODEL` で指定、Structured Outputs + Zod 検証)
+- Supabase(Anonymous Sign-In。**画像は保存しない**)
+- vitest(unit / integration)+ Playwright(最小E2E)
 
 ## セットアップ
 
-### 1. 依存関係
-
 ```bash
 npm install
-```
-
-### 2. 環境変数
-
-`.env.example` をコピーして `.env.local` を作成:
-
-```bash
-cp .env.example .env.local
-```
-
-- `ANTHROPIC_API_KEY` … [Anthropic Console](https://console.anthropic.com/) で発行。**これだけ設定すれば、保存なしのお試しモードで動作確認できます。**
-- `MOCK_REVIEW=1` … APIキー無しで固定レビューを返す開発/デモ用モード。UIフローの確認やコスト節約に。**本番では設定しないこと**(設定すると常に固定レビューになります)。
-- `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` … Supabase プロジェクトの Settings → API から。
-- `NEXT_PUBLIC_SITE_URL` … 本番URL(OGP画像・シェアリンクの絶対URL生成に使用)。未設定時は `http://localhost:3000`。本番では必ず設定します。
-
-### 3. Supabase(認証・保存を使う場合)
-
-1. [Supabase](https://supabase.com/) でプロジェクトを作成
-2. SQL Editor で `supabase/migrations/` の SQL を番号順に実行(0001: karte テーブル・RLS・Storage バケット / 0002: 機能設計書v2 対応の列と pattern_alert テーブル)
-3. Authentication → URL Configuration で Site URL とリダイレクトURL(`http://localhost:3000/auth/callback` と本番URL)を設定
-4. ログインはメールのマジックリンク方式(パスワード不要)
-
-### 4. 起動
-
-```bash
+cp .env.example .env.local   # 値を記入
 npm run dev
 ```
 
-- `http://localhost:3000/` … ランディング
-- `/app` … メイン画面(画像アップロード → AIレビュー → カルテ表示)
-- `/app/history` … カルテ履歴 / `/app/karte/[id]` … 詳細
+環境変数は `.env.example` 参照。`APP_ACCESS_COOKIE_SECRET` は十分長く(例: `openssl rand -base64 48`)。モデルIDはコードに直書きせず `ANTHROPIC_MODEL` でのみ指定します。
 
-## デプロイ(Vercel)
+- `/access` … アクセスコード入力(§2.1。署名済みHttpOnly Cookieを発行)
+- `/app` … メイン画面(オンボーディング→入力→AIレビュー→カルテ→結果後入力/フィードバック)
 
-Next.js プロジェクトは Vercel がゼロコンフィグで検出します(`vercel.json` 不要)。
+### ⚠ interim(SQL受領待ち)
 
-1. [vercel.com/new](https://vercel.com/new) でこのリポジトリを import(Framework は Next.js を自動検出)
-2. Production Branch を `main` に(main へマージ済みであること)
-3. Environment Variables を設定:
+`ポジミル_supabase_phase0.sql` 受領までの暫定として:
 
-   | 変数 | 必須 | 備考 |
-   |---|---|---|
-   | `ANTHROPIC_API_KEY` | ✅ | サーバー専用。クライアントに露出させない |
-   | `NEXT_PUBLIC_SUPABASE_URL` | ✅ | Supabase Settings → API |
-   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | 同上 |
-   | `NEXT_PUBLIC_SITE_URL` | ✅ | 本番URL。未設定だと OGP画像URLが localhost になる |
-   | `FREE_MONTHLY_LIMIT` | 任意 | 省略時 5 |
-   | `NEXT_PUBLIC_STRIPE_CHECKOUT_URL` | 任意 | 課金導線を有効化するとき |
-   | `MOCK_REVIEW` | 本番不可 | 設定すると常に固定レビューになる。本番では未設定 |
+- run / karte の永続化は `InMemoryRunStore`(`src/lib/p0/store.ts`)。SQL受領後に `finalize_ai_review_run` RPC を使う Supabase service role 実装へ差し替え
+- プレイブックは localStorage(`src/lib/p0/playbookLocal.ts`)。SQL受領後に Supabase(RLS)へ差し替え
+- RLS 実分離テスト(RLS-001〜004, RUN-007/008)は SQL 適用済みの実 Supabase に対する gated test として追加予定
 
-4. Deploy。初回デプロイ後、払い出された本番URLを `NEXT_PUBLIC_SITE_URL` に設定して再デプロイ(OGP/シェアの絶対URLを確定させる)
-5. Supabase の Authentication → URL Configuration に、本番URLと `<本番URL>/auth/callback` を追加。Storage バケット `karte-thumbs` と migrations(0001/0002)が適用済みであることを確認
+## テスト
 
-> まずは `ANTHROPIC_API_KEY` だけでお試しモードとして動作確認し、その後 Supabase 系の変数を追加する段階投入も可能です。
+```bash
+npx tsc --noEmit   # 型チェック
+npm run lint       # ESLint
+npm test           # vitest(unit / integration)
+npm run test:e2e   # Playwright 最小E2E(アクセス→匿名モック→クロップpixel検証→送信ガード)
+```
 
-## 機能メモ
+E2E は Supabase auth と `/api/review` をネットワーク層でモックし、アクセスコード・フォーム・クロップ処理は実物を通します。
 
-- **判定は損益と独立**: エントリー時点で見えていた情報のみで「エッジ/衝動/混在」を判定。後知恵禁止をプロンプトで強制。pnl系の値がプロンプトに混入しないことは `npm test`(vitest)で担保
-- **感情セルフタグ(F1)**: エントリー前の感情を1タップで自己申告(任意)。AIが実際の行動との乖離を判定し、ズレがあればカルテに「自己認識とズレ」バッジ+criticで指摘
-- **パターン検出**: 直近30日で同じタグ / 「衝動」判定 / 自己認識のズレが3回以上繰り返されるとカルテ上に警告バナー
-- **無料枠**: `/api/review` 側で月あたり `FREE_MONTHLY_LIMIT` 回(既定5回)に制限。加えて短時間の連打はperユーザーのバースト制限(既定: 1分5回)で保護
-- **コスト制御**: 画像はクライアント側で長辺1280px/JPEG q0.85 に縮小してから送信。履歴用に460pxサムネイルを別途生成し Supabase Storage(非公開バケット+署名URL)に保存
-- **課金導線**: `/upgrade` はスタブ。`NEXT_PUBLIC_STRIPE_CHECKOUT_URL` を設定すると Stripe Checkout へのリンクが有効化
-- **将来機能**: `docs/feature-design-v2.md` 参照。F2 約定履歴スクショ読み取り(`/api/extract`)・F3 Ask Karte(`/api/ask`)・F4 行動連鎖パターン検出(`/api/patterns/scan`)はエンドポイントのみ切ってあり、現状 501 を返す。スキーマ(列・pattern_alert)は 0002 で対応済み
+## Gate 0A 手作業記録
+
+外部公開・Gate 0A 評価の前に、以下を実環境(実 Supabase + 実モデル)で確認して記録します:
+
+1. **RLS A/B分離**: 匿名ユーザーA/Bを2ブラウザで作成し、互いの playbook / karte / ai_review_run が見えないこと
+2. **実モデル読解品質**: 実チャート数枚で `/app` からレビューを実行し、rule_check の観察根拠が画像と対応していること
+3. **再実行の検証**: カルテ表示の「同じ入力でもう一度レビューする」で run が `is_canonical=false` として追加され、karte が増えないこと(モデル比較時は `/api/review` へ `experiment_id` を付与)
+4. **ブラインド確認**: 送信ペイロード・DB・ログのどこにも元画像/結果/感情が含まれないこと(自動テスト+目視)
+5. **スマホタップUX**: 実機でエントリー位置タップとクロッププレビューの精度
+6. **Phase 0B 未実装確認**: `/app/trends`・集計SQL・空ルートが存在しないこと(REG-005/006)
+
+## Phase 0A で作らないもの(§16)
+
+Stripe・OGP・Xシェア・LINE・OCR・MT4/5・TradingView・自動アラート・週次レポート・SEO CMS・画像保存・`/app/trends`・Phase 0B の空ルート。
 
 ## 規制上の制約
 
-本ツールは投資助言業の登録を要しない設計です。将来の値動き予測、推奨エントリー/損切り/利確ゾーンの提示、具体的な売買指示は出力・表示しません。「次の一手」は振り返りの習慣・注意点に限定しています。
+本ツールは投資助言業の登録を要しない設計です。将来の値動き予測、推奨エントリー/損切り/利確ゾーンの提示、具体的な売買指示は出力・表示しません。
