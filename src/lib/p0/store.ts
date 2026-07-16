@@ -2,6 +2,8 @@ import type { ReviewRequest } from "./dto";
 import type {
   BlindIntegrity,
   FailureStage,
+  KarteFeedbackInput,
+  KarteResultInput,
   ReviewOutput,
 } from "./types";
 
@@ -86,6 +88,21 @@ export interface RunStore {
   ): Promise<void>;
   /** karte の所有者確認(rerun / revision 元の検証: REV-003) */
   karteBelongsToUser(karteId: string, userId: string): Promise<boolean>;
+  /**
+   * 結果の後入力(§12)。結果列のみ更新し、assessment等の監査結果・runには
+   * 触れない。false = 非所有または不存在
+   */
+  setResult(
+    karteId: string,
+    userId: string,
+    result: KarteResultInput,
+  ): Promise<boolean>;
+  /** 構造化フィードバックの保存(§13)。false = 非所有または不存在 */
+  setFeedback(
+    karteId: string,
+    userId: string,
+    feedback: KarteFeedbackInput,
+  ): Promise<boolean>;
 }
 
 // ---------------------------------------------------------------------------
@@ -106,6 +123,8 @@ interface MemoryRun {
 
 interface MemoryKarte extends KarteInit {
   id: string;
+  result: KarteResultInput | null;
+  feedback: KarteFeedbackInput | null;
 }
 
 export class InMemoryRunStore implements RunStore {
@@ -159,7 +178,7 @@ export class InMemoryRunStore implements RunStore {
     const run = this.getRun(runId);
     // 1 karte に canonical run は1件だけ(RUN-007 相当のガード)
     const id = this.nextId("karte");
-    this.kartes.push({ ...karte, id });
+    this.kartes.push({ ...karte, id, result: null, feedback: null });
     run.status = "succeeded";
     run.karteId = id;
     run.isCanonical = true;
@@ -181,6 +200,32 @@ export class InMemoryRunStore implements RunStore {
 
   async karteBelongsToUser(karteId: string, userId: string): Promise<boolean> {
     return this.kartes.some((k) => k.id === karteId && k.userId === userId);
+  }
+
+  async setResult(
+    karteId: string,
+    userId: string,
+    result: KarteResultInput,
+  ): Promise<boolean> {
+    const karte = this.kartes.find(
+      (k) => k.id === karteId && k.userId === userId,
+    );
+    if (!karte) return false;
+    karte.result = result;
+    return true;
+  }
+
+  async setFeedback(
+    karteId: string,
+    userId: string,
+    feedback: KarteFeedbackInput,
+  ): Promise<boolean> {
+    const karte = this.kartes.find(
+      (k) => k.id === karteId && k.userId === userId,
+    );
+    if (!karte) return false;
+    karte.feedback = feedback;
+    return true;
   }
 }
 

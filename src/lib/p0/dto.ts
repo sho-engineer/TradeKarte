@@ -1,9 +1,15 @@
 import { z } from "zod";
 import {
+  ASSESSMENTS,
   DIRECTIONS,
   EMOTIONS,
+  FEEDBACK_RATINGS,
+  INCORRECT_AREAS,
   MEMORY_SOURCES,
+  TRADE_RESULTS,
   type BlindIntegrity,
+  type KarteFeedbackInput,
+  type KarteResultInput,
   type NormalizedRule,
   type PlaybookRules,
 } from "./types";
@@ -84,9 +90,7 @@ export type DtoResult =
 export function parseReviewRequest(body: unknown): DtoResult {
   const r = reviewRequestSchema.safeParse(body);
   if (!r.success) {
-    const issue = r.error.issues[0];
-    const path = issue?.path.join(".") || "(root)";
-    return { ok: false, message: `${path}: ${issue?.message ?? "invalid"}` };
+    return { ok: false, message: firstIssueMessage(r.error) };
   }
   if (r.data.revision_of && r.data.rerun_of_karte_id) {
     return {
@@ -147,6 +151,50 @@ export function normalizeRules(snapshot: PlaybookRules): NormalizedRule[] {
         ]
       : []),
   ];
+}
+
+// 結果の後入力(§12)。AI再実行なし・assessment不変・revision非作成。
+// strictObject のため assessment 等の監査結果キーは受け取れない。
+export const karteResultSchema = z.strictObject({
+  result: z.enum(TRADE_RESULTS),
+  pnl_pips: z.number().finite().nullable(),
+  exit_reason: z.string().min(1).max(500).nullable(),
+});
+
+// 構造化フィードバック(§13)。不正な incorrect_area はZodで拒否(FB-003)
+export const karteFeedbackSchema = z.strictObject({
+  rating: z.enum(FEEDBACK_RATINGS),
+  incorrect_areas: z
+    .array(z.enum(INCORRECT_AREAS))
+    .refine((a) => new Set(a).size === a.length, {
+      message: "incorrect_areas に重複があります",
+    }),
+  corrected_assessment: z.enum(ASSESSMENTS).nullable(),
+  comment: z.string().min(1).max(2000).nullable(),
+});
+
+function firstIssueMessage(error: z.ZodError): string {
+  const issue = error.issues[0];
+  const path = issue?.path.join(".") || "(root)";
+  return `${path}: ${issue?.message ?? "invalid"}`;
+}
+
+export function parseKarteResult(
+  body: unknown,
+): { ok: true; value: KarteResultInput } | { ok: false; message: string } {
+  const r = karteResultSchema.safeParse(body);
+  return r.success
+    ? { ok: true, value: r.data }
+    : { ok: false, message: firstIssueMessage(r.error) };
+}
+
+export function parseKarteFeedback(
+  body: unknown,
+): { ok: true; value: KarteFeedbackInput } | { ok: false; message: string } {
+  const r = karteFeedbackSchema.safeParse(body);
+  return r.success
+    ? { ok: true, value: r.data }
+    : { ok: false, message: firstIssueMessage(r.error) };
 }
 
 /**

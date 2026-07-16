@@ -99,6 +99,24 @@ export interface PlaybookRules {
   stop_rule: { rule_id: string; text: string } | null;
 }
 
+export const TRADE_RESULTS = ["win", "loss", "breakeven"] as const;
+export type TradeResult = (typeof TRADE_RESULTS)[number];
+
+/** 結果の後入力(§12)。AI再実行なし・assessment不変・revision非作成 */
+export interface KarteResultInput {
+  result: TradeResult;
+  pnl_pips: number | null;
+  exit_reason: string | null;
+}
+
+/** 構造化フィードバック(§13) */
+export interface KarteFeedbackInput {
+  rating: FeedbackRating;
+  incorrect_areas: IncorrectArea[];
+  corrected_assessment: AssessmentKey | null;
+  comment: string | null;
+}
+
 /** AIレビューの検証済み出力(§8) */
 export interface ReviewOutput {
   assessment: AssessmentKey;
