@@ -1,16 +1,18 @@
 import AnonGate from "@/components/p0/AnonGate";
+import ReviewForm from "@/components/p0/ReviewForm";
 
-// Phase 0A Step 2 時点の最小画面。入力画面(Step 11)は
-// レビューAPI+核心テストのチェックポイント確認後に実装する。
+// Phase 0A メイン画面: 入力(§4)→AIレビュー→カルテ表示(§11)。
 export default function AppPage() {
   return (
     <AnonGate>
-      <main className="mx-auto w-full max-w-2xl px-6 py-16">
-        <h1 className="text-xl font-bold">ポジミル(Phase 0A)</h1>
-        <p className="mt-4 text-sm leading-relaxed text-muted">
-          匿名セッションの準備ができています。レビューは現在 API
-          経由で実行できます(入力画面は次のステップで実装)。
-        </p>
+      <main className="mx-auto w-full max-w-2xl px-6 py-10">
+        <header className="mb-8">
+          <h1 className="text-xl font-bold">ポジミル</h1>
+          <p className="mt-2 text-sm leading-relaxed text-muted">
+            そのエントリー、ルール通り？ 結果を知る前の判断だけを、あなたのプレイブックに照らして監査します。
+          </p>
+        </header>
+        <ReviewForm />
       </main>
     </AnonGate>
   );
